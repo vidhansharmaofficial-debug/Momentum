@@ -4,7 +4,7 @@ const STORE_KEY = "momentum_data";
  * Get full app state
  */
 export function getStore() {
-  return JSON.parse(localStorage.getItem("momentum_data")) || {
+  return JSON.parse(localStorage.getItem(STORE_KEY)) || {
     tasks: [],
     notes: [],
     habits: [],
