@@ -45,16 +45,31 @@ export function getHabitStats() {
 export function getMomentumScore() {
   const taskStats = getTaskStats();
   const habitStats = getHabitStats();
+  const focusStats = getFocusStats();
 
-  const taskScore = taskStats.rate; // 0–100
-  const habitScore = Math.min(habitStats.avgStreak * 10, 100); // cap at 100
+  // Task performance (0–100)
+  const taskScore = taskStats.rate;
 
-  const score = Math.round(taskScore * 0.6 + habitScore * 0.4);
+  // Habit consistency (0–100)
+  const habitScore = Math.min(habitStats.avgStreak * 10, 100);
+
+  // Focus productivity (based on time spent)
+  const focusScore = Math.min(focusStats.minutes, 120); // cap at 120 min
+  const normalizedFocusScore = Math.round((focusScore / 120) * 100);
+
+  // Weighted system
+  const score = Math.round(
+    taskScore * 0.4 +
+    habitScore * 0.3 +
+    normalizedFocusScore * 0.3
+  );
 
   return {
     score,
     taskScore,
-    habitScore
+    habitScore,
+    focusScore: normalizedFocusScore,
+    focusMinutes: focusStats.minutes
   };
 }
 export function getFocusStats() {
