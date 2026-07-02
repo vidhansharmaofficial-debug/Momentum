@@ -1,8 +1,8 @@
 import { getStore } from "../core/store.js";
-import { getFocusSessions } from "./focus.js";
-import { getFocusState, getFocusSessions } from "./focus.js";
+import { getFocusSessions, getFocusState } from "./focus.js";
+
 /**
- * Calculate task completion rate
+ * Task stats
  */
 export function getTaskStats() {
   const store = getStore();
@@ -24,6 +24,7 @@ export function getHabitStats() {
   const store = getStore();
 
   const total = store.habits.length;
+
   const avgStreak =
     total === 0
       ? 0
@@ -38,56 +39,8 @@ export function getHabitStats() {
 }
 
 /**
- * Momentum Score (core identity metric)
- * Weighted system:
- * - task completion: 60%
- * - habit consistency: 40%
+ * Focus stats (history-based)
  */
-export function getMomentumScore() {
-  const taskStats = getTaskStats();
-  const habitStats = getHabitStats();
-  const focusSessions = getFocusSessions();
-
-  const taskScore = taskStats.rate;
-
-  const habitScore = Math.min(habitStats.avgStreak * 10, 100);
-
-  const focusMinutes = focusSessions
-    .filter(s => s.completed)
-    .reduce((sum, s) => sum + (s.duration || 0), 0);
-
-  const focusScore = Math.min(focusMinutes, 120);
-  const normalizedFocusScore = Math.round((focusScore / 120) * 100);
-
-  // LIVE penalty/boost system
-  const live = getLiveFocusState();
-  const liveBoost = live.active ? 10 : 0;
-
-  const score = Math.round(
-    taskScore * 0.35 +
-    habitScore * 0.25 +
-    normalizedFocusScore * 0.30 +
-    liveBoost * 0.10
-  );
-
-  return {
-    score,
-    taskScore,
-    habitScore,
-    focusScore: normalizedFocusScore,
-    focusMinutes,
-    liveFocus: live
-  };
-}
-
-  return {
-    score,
-    taskScore,
-    habitScore,
-    focusScore: normalizedFocusScore,
-    focusMinutes: focusStats.minutes
-  };
-}
 export function getFocusStats() {
   const sessions = getFocusSessions();
 
@@ -104,18 +57,62 @@ export function getFocusStats() {
     minutes
   };
 }
+
+/**
+ * Live focus state
+ */
 export function getLiveFocusState() {
   const sessions = getFocusSessions();
   const state = getFocusState();
 
-  const todaySessions = sessions.filter(s => {
-    const d = new Date(s.startedAt).toDateString();
-    return d === new Date().toDateString();
-  });
+  const today = new Date().toDateString();
+
+  const todaySessions = sessions.filter(s =>
+    new Date(s.startedAt).toDateString() === today
+  );
 
   return {
     active: state.active,
     remainingSeconds: state.remainingSeconds,
     todayCount: todaySessions.length
+  };
+}
+
+/**
+ * Momentum Score Engine
+ */
+export function getMomentumScore() {
+  const taskStats = getTaskStats();
+  const habitStats = getHabitStats();
+  const focusSessions = getFocusSessions();
+  const live = getLiveFocusState();
+
+  const taskScore = taskStats.rate;
+
+  const habitScore = Math.min(habitStats.avgStreak * 10, 100);
+
+  const focusMinutes = focusSessions
+    .filter(s => s.completed)
+    .reduce((sum, s) => sum + (s.duration || 0), 0);
+
+  const focusScore = Math.min(focusMinutes, 120);
+  const normalizedFocusScore = Math.round((focusScore / 120) * 100);
+
+  const liveBoost = live.active ? 10 : 0;
+
+  const score = Math.round(
+    taskScore * 0.35 +
+    habitScore * 0.25 +
+    normalizedFocusScore * 0.30 +
+    liveBoost * 0.10
+  );
+
+  return {
+    score,
+    taskScore,
+    habitScore,
+    focusScore: normalizedFocusScore,
+    focusMinutes,
+    liveFocus: live
   };
 }
