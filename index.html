@@ -150,6 +150,7 @@
       <div class="nav-item active" onclick="loadPage('dashboard', this)">Dashboard</div>
       <div class="nav-item" onclick="loadPage('tasks', this)">Tasks</div>
       <div class="nav-item" onclick="loadPage('notes', this)">Notes</div>
+      <div class="nav-item" onclick="loadPage('habits', this)">Habits</div>
       <div class="nav-item" onclick="loadPage('calendar', this)">Calendar</div>
       <div class="nav-item" onclick="loadPage('scratchpad', this)">Scratchpad</div>
       <div class="nav-item" onclick="loadPage('spaces', this)">Spaces</div>
@@ -174,6 +175,7 @@
     import { getStore } from "./src/core/store.js";
     import { addTask, deleteTask, toggleTask } from "./src/modules/tasks.js";
     import { addNote, deleteNote } from "./src/modules/notes.js";
+    import { addHabit, completeHabit, getHabits } from "./src/modules/habits.js";
 
     const content = document.getElementById("content");
     const items = document.querySelectorAll(".nav-item");
@@ -190,7 +192,7 @@
       if (el) el.classList.add("active");
     }
 
-    // ---------- TASK UI ----------
+    /* ---------------- TASKS ---------------- */
     function renderTasks() {
       const store = getStore();
 
@@ -217,7 +219,7 @@
       `;
     }
 
-    // ---------- NOTES UI ----------
+    /* ---------------- NOTES ---------------- */
     function renderNotes() {
       const store = getStore();
 
@@ -243,10 +245,37 @@
       `;
     }
 
+    /* ---------------- HABITS ---------------- */
+    function renderHabits() {
+      const habits = getHabits();
+
+      return `
+        <div class="card">
+          <div class="title">Habits</div>
+          <div class="subtitle">Build consistency</div>
+        </div>
+
+        ${habits.map(h => `
+          <div class="card">
+            <div class="title">${h.name}</div>
+            <div class="subtitle">🔥 Streak: ${h.streak}</div>
+            <button onclick="window.__completeHabit(${h.id})">Complete Today</button>
+          </div>
+        `).join("")}
+
+        <div class="card">
+          <input id="habitInput" placeholder="New habit..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;"/>
+          <button onclick="window.__addHabit()">Add Habit</button>
+        </div>
+      `;
+    }
+
+    /* ---------------- PAGES ---------------- */
     const pages = {
       dashboard: `<div class="card"><div class="title">Dashboard</div></div>`,
       tasks: renderTasks(),
       notes: renderNotes(),
+      habits: renderHabits(),
       calendar: `<div class="card"><div class="title">Calendar</div></div>`,
       scratchpad: `<div class="card"><div class="title">Scratchpad</div></div>`,
       spaces: `<div class="card"><div class="title">Spaces</div></div>`,
@@ -254,7 +283,7 @@
       settings: `<div class="card"><div class="title">Settings</div></div>`
     };
 
-    // ---------- GLOBAL FUNCTIONS ----------
+    /* ---------------- GLOBAL FUNCTIONS ---------------- */
     window.__addTask = () => {
       const input = document.getElementById("taskInput");
       if (!input.value.trim()) return;
@@ -283,6 +312,18 @@
     window.__deleteNote = (id) => {
       deleteNote(id);
       loadPage("notes");
+    };
+
+    window.__addHabit = () => {
+      const input = document.getElementById("habitInput");
+      if (!input.value.trim()) return;
+      addHabit(input.value);
+      loadPage("habits");
+    };
+
+    window.__completeHabit = (id) => {
+      completeHabit(id);
+      loadPage("habits");
     };
 
     loadPage("dashboard");
