@@ -16,7 +16,6 @@
   --accent: #7c5cff;
 }
 
-/* GLOBAL FIX: smooth system feel */
 * {
   margin: 0;
   padding: 0;
@@ -32,7 +31,6 @@ body {
   overflow: hidden;
 }
 
-/* soft glow background */
 body::before {
   content: "";
   position: fixed;
@@ -41,13 +39,11 @@ body::before {
   pointer-events: none;
 }
 
-/* APP LAYOUT */
 .app {
   display: flex;
   height: 100vh;
 }
 
-/* SIDEBAR */
 .sidebar {
   width: 240px;
   background: var(--panel);
@@ -75,10 +71,8 @@ body::before {
 
 .nav-item.active {
   background: rgba(124,92,255,0.2);
-  color: var(--text);
 }
 
-/* MAIN */
 .main {
   flex: 1;
   display: flex;
@@ -94,17 +88,15 @@ body::before {
   border-bottom: 1px solid var(--border);
 }
 
-/* CONTENT SYSTEM */
 .content {
   padding: 28px;
   overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  transition: opacity 0.2s ease;
+  opacity: 1;
 }
 
-/* CARDS */
 .card {
   background: var(--panel);
   padding: 18px;
@@ -114,24 +106,18 @@ body::before {
 
 .card:hover {
   background: var(--panel-strong);
-  transform: translateY(-1px);
 }
 
-/* TEXT */
 .title {
   font-size: 18px;
   font-weight: 600;
-  letter-spacing: 0.2px;
-  margin-bottom: 6px;
 }
 
 .subtitle {
   font-size: 13px;
   color: var(--muted);
-  line-height: 1.5;
 }
 
-/* BUTTONS (FINAL PREMIUM STYLE) */
 button {
   margin-top: 10px;
   padding: 10px 14px;
@@ -140,20 +126,13 @@ button {
   background: rgba(124,92,255,0.9);
   color: white;
   cursor: pointer;
-  font-weight: 500;
 }
 
 button:hover {
   transform: translateY(-1px);
-  background: rgba(124,92,255,1);
 }
 
-button:active {
-  transform: scale(0.96);
-  opacity: 0.85;
-}
-
-/* COMMAND PALETTE */
+/* palette */
 #palette {
   position: fixed;
   inset: 0;
@@ -161,24 +140,12 @@ button:active {
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
 }
 
 #cmdInput {
   width: 420px;
   padding: 14px;
-  border-radius: 10px;
-  border: none;
-  outline: none;
-  font-size: 14px;
 }
-
-/* FOCUS MODE */
-.focus-glow {
-  border: 1px solid rgba(124,92,255,0.4);
-  box-shadow: 0 0 20px rgba(124,92,255,0.15);
-}
-
 </style>
 </head>
 
@@ -188,7 +155,6 @@ button:active {
 
   <div class="sidebar">
     <div class="logo">⚡ Momentum</div>
-
     <div class="nav-item active" onclick="loadPage('dashboard', this)">Dashboard</div>
     <div class="nav-item" onclick="loadPage('tasks', this)">Tasks</div>
     <div class="nav-item" onclick="loadPage('notes', this)">Notes</div>
@@ -203,9 +169,8 @@ button:active {
 
 </div>
 
-<!-- COMMAND PALETTE -->
 <div id="palette">
-  <input id="cmdInput" placeholder="Type command..." />
+  <input id="cmdInput" placeholder="command..." />
 </div>
 
 <script type="module">
@@ -217,206 +182,120 @@ import { getHabits } from "./src/modules/habits.js";
 import { getTaskStats, getHabitStats, getMomentumScore } from "./src/modules/insights.js";
 import { startFocus, stopFocus, getFocusState } from "./src/modules/focusEngine.js";
 
-let currentPage = "dashboard";
+let current = "dashboard";
 
 const content = document.getElementById("content");
 const items = document.querySelectorAll(".nav-item");
 
-/* ---------------- RENDER ---------------- */
-
 function render() {
-  content.innerHTML = pages[currentPage]();
+  content.innerHTML = pages[current]();
 }
 
-/* ---------------- LIVE TIMER ---------------- */
-
-setInterval(() => {
-  if (currentPage === "focus") {
-    const state = getFocusState();
-    const el = document.getElementById("timer");
-
-    if (el) {
-      const m = Math.floor(state.remainingSeconds / 60);
-      const s = state.remainingSeconds % 60;
-      el.innerText = `${m}:${s.toString().padStart(2,'0')}`;
-    }
-  }
-}, 1000);
-
-/* ---------------- NAV ---------------- */
-
-function loadPage(page, el) {
-  currentPage = page;
-
-  content.style.opacity = "0";
-
-  setTimeout(() => {
-    render();
-    content.style.opacity = "1";
-  }, 100);
-
+function loadPage(p, el) {
+  current = p;
+  render();
   items.forEach(i => i.classList.remove("active"));
   if (el) el.classList.add("active");
 }
 
-/* ---------------- DASHBOARD ---------------- */
-
+/* DASHBOARD */
 function dashboard() {
   const score = getMomentumScore();
   const tasks = getTaskStats();
   const habits = getHabitStats();
 
   return `
-    <div class="card">
-      <div class="title">Momentum System</div>
-      <div class="subtitle">Live productivity engine</div>
-    </div>
-
-    <div class="card">
-      <div class="title">Score</div>
-      <div class="subtitle" style="font-size:26px;font-weight:600;">
-        ${score.score}/100
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="title">Execution</div>
-      <div class="subtitle">
-        Tasks: ${tasks.done}/${tasks.total} • Rate: ${tasks.rate}%
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="title">Consistency</div>
-      <div class="subtitle">
-        Habits Avg Streak: ${habits.avgStreak}
-      </div>
-    </div>
+    <div class="card"><div class="title">Score ${score.score}/100</div></div>
+    <div class="card"><div class="subtitle">Tasks ${tasks.done}/${tasks.total}</div></div>
+    <div class="card"><div class="subtitle">Habits avg ${habits.avgStreak}</div></div>
   `;
 }
 
-/* ---------------- TASKS ---------------- */
-
+/* TASKS */
 function tasks() {
   const store = getStore();
 
-  return `
-    <div class="card"><div class="title">Tasks</div></div>
-
-    ${store.tasks.map(t => `
-      <div class="card">
-        ${t.text}
-        <button onclick="window.__toggleTask(${t.id})">Toggle</button>
-        <button onclick="window.__deleteTask(${t.id})">Delete</button>
-      </div>
-    `).join("")}
-  `;
+  return store.tasks.map(t => `
+    <div class="card">
+      ${t.text}
+      <button onclick="window.__toggleTask(${t.id})">toggle</button>
+      <button onclick="window.__deleteTask(${t.id})">delete</button>
+    </div>
+  `).join("");
 }
 
-/* ---------------- NOTES ---------------- */
-
+/* NOTES */
 function notes() {
   const store = getStore();
 
-  return `
-    <div class="card"><div class="title">Notes</div></div>
-
-    ${store.notes.map(n => `
-      <div class="card">
-        <div class="title">${n.title}</div>
-        <div class="subtitle">${n.content}</div>
-      </div>
-    `).join("")}
-  `;
+  return store.notes.map(n => `
+    <div class="card">
+      <div class="title">${n.title}</div>
+      <div class="subtitle">${n.content}</div>
+    </div>
+  `).join("");
 }
 
-/* ---------------- HABITS ---------------- */
-
+/* HABITS */
 function habits() {
-  const h = getHabits();
-
-  return `
-    <div class="card"><div class="title">Habits</div></div>
-
-    ${h.map(x => `
-      <div class="card">
-        ${x.name} — 🔥 ${x.streak}
-      </div>
-    `).join("")}
-  `;
+  return getHabits().map(h => `
+    <div class="card">${h.name} 🔥${h.streak}</div>
+  `).join("");
 }
 
-/* ---------------- FOCUS ---------------- */
-
+/* FOCUS */
 function focus() {
   const state = getFocusState();
-  const active = state.active ? "focus-glow" : "";
+  const m = Math.floor(state.remainingSeconds / 60);
+  const s = state.remainingSeconds % 60;
 
   return `
-    <div class="card ${active}">
-      <div class="title">Focus Mode</div>
-      <div class="subtitle">
-        ${state.active ? "Deep work active" : "Ready to start"}
-      </div>
-    </div>
-
+    <div class="card"><div class="title">Focus ${state.active ? "ON" : "OFF"}</div></div>
     <div class="card">
-      <div class="title" id="timer">
-        ${Math.floor(state.remainingSeconds / 60)}:00
-      </div>
-
-      <button onclick="window.__startFocus()">Start 25 min</button>
-      <button onclick="window.__stopFocus()">Stop</button>
+      <div class="title">${m}:${s.toString().padStart(2,'0')}</div>
+      <button onclick="window.__startFocus()">start</button>
+      <button onclick="window.__stopFocus()">stop</button>
     </div>
   `;
 }
 
 const pages = { dashboard, tasks, notes, habits, focus };
 
-/* ---------------- COMMAND PALETTE ---------------- */
-
+/* palette */
 const palette = document.getElementById("palette");
-const cmdInput = document.getElementById("cmdInput");
+const input = document.getElementById("cmdInput");
 
-window.addEventListener("keydown", (e) => {
+window.addEventListener("keydown", e => {
   if (e.ctrlKey && e.key === "k") {
-    e.preventDefault();
     palette.style.display = "flex";
-    cmdInput.focus();
+    input.focus();
   }
-
-  if (e.key === "Escape") {
-    palette.style.display = "none";
-  }
+  if (e.key === "Escape") palette.style.display = "none";
 });
 
-cmdInput.addEventListener("keydown", (e) => {
+input.addEventListener("keydown", e => {
   if (e.key !== "Enter") return;
 
-  const v = cmdInput.value.toLowerCase();
+  const v = input.value.trim().toLowerCase();
 
-  if (v === "dashboard") loadPage("dashboard");
-  else if (v === "tasks") loadPage("tasks");
-  else if (v === "notes") loadPage("notes");
-  else if (v === "habits") loadPage("habits");
-  else if (v === "focus") loadPage("focus");
+  if (v === "tasks") loadPage("tasks");
+  if (v === "notes") loadPage("notes");
+  if (v === "focus") loadPage("focus");
 
-  else if (v.startsWith("task:")) addTask(v.replace("task:", ""));
-  else if (v.startsWith("note:")) addNote("Note", v.replace("note:", ""));
+  if (v.startsWith("task:")) addTask(v.replace("task:", ""));
+  if (v.startsWith("note:")) addNote("note", v.replace("note:", ""));
 
   palette.style.display = "none";
-  cmdInput.value = "";
+  input.value = "";
 });
 
-/* ---------------- ACTIONS ---------------- */
-
-window.__toggleTask = (id) => toggleTask(id);
-window.__deleteTask = (id) => deleteTask(id);
+/* actions */
+window.__toggleTask = toggleTask;
+window.__deleteTask = deleteTask;
 window.__startFocus = () => startFocus(25);
-window.__stopFocus = () => stopFocus();
+window.__stopFocus = stopFocus;
 
-/* ---------------- INIT ---------------- */
-
+/* init */
 render();
 
 </script>
