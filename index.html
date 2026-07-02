@@ -91,7 +91,6 @@
     .content {
       padding: 24px;
       overflow: auto;
-      transition: opacity 0.15s ease;
     }
 
     .card {
@@ -113,6 +112,7 @@
       background: var(--accent);
       color: white;
       cursor: pointer;
+      margin-right: 6px;
     }
   </style>
 </head>
@@ -127,18 +127,14 @@
     <div class="nav-item" onclick="loadPage('tasks', this)">Tasks</div>
     <div class="nav-item" onclick="loadPage('notes', this)">Notes</div>
     <div class="nav-item" onclick="loadPage('habits', this)">Habits</div>
-    <div class="nav-item" onclick="loadPage('calendar', this)">Calendar</div>
-    <div class="nav-item" onclick="loadPage('scratchpad', this)">Scratchpad</div>
-    <div class="nav-item" onclick="loadPage('spaces', this)">Spaces</div>
-    <div class="nav-item" onclick="loadPage('insights', this)">Insights</div>
-    <div class="nav-item" onclick="loadPage('settings', this)">Settings</div>
+    <div class="nav-item" onclick="loadPage('focus', this)">Focus</div>
   </div>
 
   <div class="main">
 
     <div class="topbar">
       <input class="search" placeholder="Search Momentum..." />
-      <div>🔔 🎵 👤</div>
+      <div>⚡ 🎵 👤</div>
     </div>
 
     <div class="content" id="content"></div>
@@ -153,11 +149,9 @@
   import { addNote, deleteNote } from "./src/modules/notes.js";
   import { addHabit, completeHabit, getHabits } from "./src/modules/habits.js";
 
-  import {
-    getTaskStats,
-    getHabitStats,
-    getMomentumScore
-  } from "./src/modules/insights.js";
+  import { getTaskStats, getHabitStats, getMomentumScore } from "./src/modules/insights.js";
+
+  import { startFocus, stopFocus, getFocusState } from "./src/modules/focusEngine.js";
 
   let currentPage = "dashboard";
 
@@ -167,18 +161,25 @@
   /* ---------------- LIVE SYSTEM ---------------- */
 
   function renderCurrentPage() {
-    content.innerHTML = pages[currentPage] || "";
+    content.innerHTML = pages[currentPage]();
   }
 
-  function startLiveSystem() {
-    setInterval(() => {
-      if (currentPage === "dashboard") {
-        renderCurrentPage();
+  setInterval(() => {
+    if (currentPage === "dashboard" || currentPage === "focus") {
+      renderCurrentPage();
+    }
+
+    if (currentPage === "focus") {
+      const state = getFocusState();
+      const el = document.getElementById("focusTimer");
+
+      if (el) {
+        const m = Math.floor(state.remainingSeconds / 60);
+        const s = state.remainingSeconds % 60;
+        el.innerText = `${m}:${s.toString().padStart(2, "0")}`;
       }
-    }, 2000);
-  }
-
-  /* ---------------- NAVIGATION ---------------- */
+    }
+  }, 1000);
 
   function loadPage(page, el) {
     currentPage = page;
@@ -194,81 +195,9 @@
     if (el) el.classList.add("active");
   }
 
-  /* ---------------- TASKS ---------------- */
+  /* ---------------- DASHBOARD ---------------- */
 
-  function renderTasks() {
-    const store = getStore();
-
-    return `
-      <div class="card"><div class="title">Tasks</div></div>
-
-      ${store.tasks.map(t => `
-        <div class="card">
-          <div class="title" style="${t.done ? 'text-decoration:line-through;opacity:0.5;' : ''}">
-            ${t.text}
-          </div>
-          <button onclick="window.__toggleTask(${t.id})">Toggle</button>
-          <button onclick="window.__deleteTask(${t.id})">Delete</button>
-        </div>
-      `).join("")}
-
-      <div class="card">
-        <input id="taskInput" placeholder="Add task..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;" />
-        <button onclick="window.__addTask()">Add Task</button>
-      </div>
-    `;
-  }
-
-  /* ---------------- NOTES ---------------- */
-
-  function renderNotes() {
-    const store = getStore();
-
-    return `
-      <div class="card"><div class="title">Notes</div></div>
-
-      <div class="card">
-        <input id="noteTitle" placeholder="Title..." style="width:100%;padding:10px;margin-bottom:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;" />
-        <textarea id="noteContent" placeholder="Write note..." style="width:100%;height:120px;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;"></textarea>
-        <button onclick="window.__addNote()">Save Note</button>
-      </div>
-
-      ${store.notes.map(n => `
-        <div class="card">
-          <div class="title">${n.title}</div>
-          <div class="subtitle">${n.content}</div>
-          <button onclick="window.__deleteNote(${n.id})">Delete</button>
-        </div>
-      `).join("")}
-    `;
-  }
-
-  /* ---------------- HABITS ---------------- */
-
-  function renderHabits() {
-    const habits = getHabits();
-
-    return `
-      <div class="card"><div class="title">Habits</div></div>
-
-      ${habits.map(h => `
-        <div class="card">
-          <div class="title">${h.name}</div>
-          <div class="subtitle">🔥 Streak: ${h.streak}</div>
-          <button onclick="window.__completeHabit(${h.id})">Complete</button>
-        </div>
-      `).join("")}
-
-      <div class="card">
-        <input id="habitInput" placeholder="New habit..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;" />
-        <button onclick="window.__addHabit()">Add Habit</button>
-      </div>
-    `;
-  }
-
-  /* ---------------- DASHBOARD (INTELLIGENCE) ---------------- */
-
-  function renderDashboard() {
+  function dashboard() {
     const score = getMomentumScore();
     const tasks = getTaskStats();
     const habits = getHabitStats();
@@ -276,7 +205,7 @@
     return `
       <div class="card">
         <div class="title">Momentum Score</div>
-        <div class="subtitle">Live productivity intelligence system</div>
+        <div class="subtitle">Live productivity system</div>
       </div>
 
       <div class="card">
@@ -302,24 +231,93 @@
     `;
   }
 
-  const pages = {
-    dashboard: renderDashboard,
-    tasks: renderTasks,
-    notes: renderNotes,
-    habits: renderHabits,
-    calendar: () => `<div class="card"><div class="title">Calendar</div></div>`,
-    scratchpad: () => `<div class="card"><div class="title">Scratchpad</div></div>`,
-    spaces: () => `<div class="card"><div class="title">Spaces</div></div>`,
-    insights: () => `<div class="card"><div class="title">Insights</div></div>`,
-    settings: () => `<div class="card"><div class="title">Settings</div></div>`
-  };
+  /* ---------------- TASKS ---------------- */
+
+  function tasks() {
+    const store = getStore();
+
+    return `
+      <div class="card"><div class="title">Tasks</div></div>
+
+      ${store.tasks.map(t => `
+        <div class="card">
+          <div class="title">${t.text}</div>
+          <button onclick="window.__toggleTask(${t.id})">Toggle</button>
+          <button onclick="window.__deleteTask(${t.id})">Delete</button>
+        </div>
+      `).join("")}
+
+      <div class="card">
+        <input id="taskInput" placeholder="Add task..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;" />
+        <button onclick="window.__addTask()">Add</button>
+      </div>
+    `;
+  }
+
+  /* ---------------- NOTES ---------------- */
+
+  function notes() {
+    const store = getStore();
+
+    return `
+      <div class="card"><div class="title">Notes</div></div>
+
+      ${store.notes.map(n => `
+        <div class="card">
+          <div class="title">${n.title}</div>
+          <div class="subtitle">${n.content}</div>
+        </div>
+      `).join("")}
+    `;
+  }
+
+  /* ---------------- HABITS ---------------- */
+
+  function habits() {
+    const h = getHabits();
+
+    return `
+      <div class="card"><div class="title">Habits</div></div>
+
+      ${h.map(x => `
+        <div class="card">
+          <div class="title">${x.name}</div>
+          <div class="subtitle">🔥 ${x.streak}</div>
+        </div>
+      `).join("")}
+    `;
+  }
+
+  /* ---------------- FOCUS MODE ---------------- */
+
+  function focus() {
+    const state = getFocusState();
+
+    return `
+      <div class="card">
+        <div class="title">Focus Mode</div>
+        <div class="subtitle">Deep work system</div>
+      </div>
+
+      <div class="card">
+        <div class="title">Timer</div>
+        <div class="subtitle" id="focusTimer">
+          ${Math.floor(state.remainingSeconds / 60)}:00
+        </div>
+
+        <button onclick="window.__startFocus()">Start</button>
+        <button onclick="window.__stopFocus()">Stop</button>
+      </div>
+    `;
+  }
+
+  const pages = { dashboard, tasks, notes, habits, focus };
 
   /* ---------------- GLOBAL ACTIONS ---------------- */
 
   window.__addTask = () => {
     const i = document.getElementById("taskInput");
-    if (!i.value.trim()) return;
-    addTask(i.value);
+    if (i.value) addTask(i.value);
     loadPage("tasks");
   };
 
@@ -333,39 +331,12 @@
     loadPage("tasks");
   };
 
-  window.__addNote = () => {
-    const t = document.getElementById("noteTitle").value;
-    const c = document.getElementById("noteContent").value;
-    if (!t.trim() || !c.trim()) return;
-    addNote(t, c);
-    loadPage("notes");
-  };
-
-  window.__deleteNote = (id) => {
-    deleteNote(id);
-    loadPage("notes");
-  };
-
-  window.__addHabit = () => {
-    const i = document.getElementById("habitInput");
-    if (!i.value.trim()) return;
-    addHabit(i.value);
-    loadPage("habits");
-  };
-
-  window.__completeHabit = (id) => {
-    completeHabit(id);
-    loadPage("habits");
-  };
+  window.__startFocus = () => startFocus(25);
+  window.__stopFocus = () => stopFocus();
 
   /* ---------------- INIT ---------------- */
 
-  function init() {
-    renderCurrentPage();
-    startLiveSystem();
-  }
-
-  init();
+  renderCurrentPage();
 
 </script>
 
