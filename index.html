@@ -8,11 +8,11 @@
   <style>
     :root {
       --bg: #0f0f12;
-      --panel: #16161a;
+      --panel: rgba(22, 22, 26, 0.75);
       --text: #ffffff;
       --muted: rgba(255,255,255,0.6);
-      --accent: #7c5cff;
       --border: rgba(255,255,255,0.06);
+      --accent: #7c5cff;
     }
 
     * {
@@ -29,18 +29,18 @@
       overflow: hidden;
     }
 
-    /* Layout */
     .app {
       display: flex;
       height: 100vh;
     }
 
-    /* Sidebar */
+    /* SIDEBAR */
     .sidebar {
       width: 260px;
       background: var(--panel);
       border-right: 1px solid var(--border);
       padding: 16px;
+      backdrop-filter: blur(12px);
     }
 
     .logo {
@@ -51,11 +51,12 @@
 
     .nav-item {
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 12px;
       color: var(--muted);
       cursor: pointer;
       margin-bottom: 6px;
-      transition: 0.2s;
+      transition: all 0.2s ease;
+      user-select: none;
     }
 
     .nav-item:hover {
@@ -63,14 +64,19 @@
       color: var(--text);
     }
 
-    /* Main */
+    .nav-item.active {
+      background: rgba(124,92,255,0.18);
+      color: var(--text);
+    }
+
+    /* MAIN */
     .main {
       flex: 1;
       display: flex;
       flex-direction: column;
     }
 
-    /* Topbar */
+    /* TOPBAR */
     .topbar {
       height: 56px;
       display: flex;
@@ -79,6 +85,7 @@
       padding: 0 16px;
       border-bottom: 1px solid var(--border);
       background: var(--panel);
+      backdrop-filter: blur(12px);
     }
 
     .search {
@@ -98,16 +105,26 @@
       color: var(--muted);
     }
 
-    /* Content */
+    /* CONTENT */
     .content {
       padding: 24px;
+      overflow: auto;
+      transition: opacity 0.15s ease;
     }
 
     .card {
       background: var(--panel);
       padding: 20px;
-      border-radius: 16px;
+      border-radius: 18px;
       border: 1px solid var(--border);
+      margin-bottom: 16px;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(124,92,255,0.25);
     }
 
     .title {
@@ -124,42 +141,108 @@
 <body>
   <div class="app">
 
-    <!-- Sidebar -->
+    <!-- SIDEBAR -->
     <div class="sidebar">
       <div class="logo">⚡ Momentum</div>
 
-      <div class="nav-item">Dashboard</div>
-      <div class="nav-item">Tasks</div>
-      <div class="nav-item">Calendar</div>
-      <div class="nav-item">Notes</div>
-      <div class="nav-item">Scratchpad</div>
-      <div class="nav-item">Spaces</div>
-      <div class="nav-item">Insights</div>
-      <div class="nav-item">Settings</div>
+      <div class="nav-item active" onclick="loadPage('dashboard', this)">Dashboard</div>
+      <div class="nav-item" onclick="loadPage('tasks', this)">Tasks</div>
+      <div class="nav-item" onclick="loadPage('calendar', this)">Calendar</div>
+      <div class="nav-item" onclick="loadPage('notes', this)">Notes</div>
+      <div class="nav-item" onclick="loadPage('scratchpad', this)">Scratchpad</div>
+      <div class="nav-item" onclick="loadPage('spaces', this)">Spaces</div>
+      <div class="nav-item" onclick="loadPage('insights', this)">Insights</div>
+      <div class="nav-item" onclick="loadPage('settings', this)">Settings</div>
     </div>
 
-    <!-- Main -->
+    <!-- MAIN -->
     <div class="main">
 
-      <!-- Topbar -->
+      <!-- TOPBAR -->
       <div class="topbar">
         <input class="search" placeholder="Search Momentum..." />
-        <div class="icons">
-          🔔 🎵 👤
-        </div>
+        <div class="icons">🔔 🎵 👤</div>
       </div>
 
-      <!-- Content -->
-      <div class="content">
-        <div class="card">
-          <div class="title">Welcome to Momentum</div>
-          <div class="subtitle">
-            Your Productivity OS is now live.
-          </div>
-        </div>
-      </div>
+      <!-- CONTENT -->
+      <div class="content" id="content"></div>
 
     </div>
   </div>
+
+  <script>
+    const content = document.getElementById("content");
+    const items = document.querySelectorAll(".nav-item");
+
+    const pages = {
+      dashboard: `
+        <div class="card">
+          <div class="title">Dashboard</div>
+          <div class="subtitle">Overview of your productivity</div>
+        </div>
+        <div class="card">
+          <div class="title">Today</div>
+          <div class="subtitle">No tasks yet</div>
+        </div>
+      `,
+      tasks: `
+        <div class="card">
+          <div class="title">Tasks</div>
+          <div class="subtitle">Manage your tasks</div>
+        </div>
+      `,
+      calendar: `
+        <div class="card">
+          <div class="title">Calendar</div>
+          <div class="subtitle">Your schedule</div>
+        </div>
+      `,
+      notes: `
+        <div class="card">
+          <div class="title">Notes</div>
+          <div class="subtitle">Write your ideas</div>
+        </div>
+      `,
+      scratchpad: `
+        <div class="card">
+          <div class="title">Scratchpad</div>
+          <div class="subtitle">Quick thinking space</div>
+        </div>
+      `,
+      spaces: `
+        <div class="card">
+          <div class="title">Spaces</div>
+          <div class="subtitle">Organize your life areas</div>
+        </div>
+      `,
+      insights: `
+        <div class="card">
+          <div class="title">Insights</div>
+          <div class="subtitle">Progress analytics</div>
+        </div>
+      `,
+      settings: `
+        <div class="card">
+          <div class="title">Settings</div>
+          <div class="subtitle">Customize Momentum</div>
+        </div>
+      `
+    };
+
+    function loadPage(page, el) {
+      content.style.opacity = "0";
+
+      setTimeout(() => {
+        content.innerHTML = pages[page];
+        content.style.opacity = "1";
+      }, 120);
+
+      items.forEach(i => i.classList.remove("active"));
+      if (el) el.classList.add("active");
+    }
+
+    loadPage("dashboard");
+  </script>
+
 </body>
 </html>
