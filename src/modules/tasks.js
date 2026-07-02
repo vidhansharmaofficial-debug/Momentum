@@ -5,14 +5,16 @@ import { getStore, saveStore } from "../core/store.js";
  */
 export function getTasks() {
   const store = getStore();
-  return store.tasks;
+  return store.tasks || [];
 }
 
 /**
- * Add a new task
+ * Add new task
  */
 export function addTask(text) {
   const store = getStore();
+
+  store.tasks = store.tasks || [];
 
   const newTask = {
     id: Date.now(),
@@ -32,7 +34,11 @@ export function addTask(text) {
  */
 export function deleteTask(id) {
   const store = getStore();
+
+  store.tasks = store.tasks || [];
+
   store.tasks = store.tasks.filter(t => t.id !== id);
+
   saveStore(store);
 }
 
@@ -43,16 +49,22 @@ export function toggleTask(id) {
   const store = getStore();
 
   const task = store.tasks.find(t => t.id === id);
-  if (task) task.done = !task.done;
+  if (!task) return;
+
+  task.done = !task.done;
 
   saveStore(store);
 }
 
 /**
- * Clear all completed tasks
+ * Clear completed tasks
  */
 export function clearCompleted() {
   const store = getStore();
+
+  store.tasks = store.tasks || [];
+
   store.tasks = store.tasks.filter(t => !t.done);
+
   saveStore(store);
 }
