@@ -35,7 +35,6 @@ body {
   height: 100vh;
 }
 
-/* SIDEBAR */
 .sidebar {
   width: 240px;
   background: var(--panel);
@@ -65,7 +64,6 @@ body {
   background: rgba(124,92,255,0.2);
 }
 
-/* MAIN */
 .main {
   flex: 1;
   display: flex;
@@ -113,17 +111,12 @@ button {
   color: white;
   cursor: pointer;
 }
-
-button:hover {
-  opacity: 0.9;
-}
 </style>
 </head>
 
 <body>
 
 <div class="app">
-
   <div class="sidebar">
     <div class="logo">⚡ Momentum</div>
 
@@ -138,7 +131,6 @@ button:hover {
     <div class="topbar">⚡ Momentum</div>
     <div class="content" id="content"></div>
   </div>
-
 </div>
 
 <script type="module">
@@ -151,10 +143,9 @@ import { getTaskStats, getHabitStats, getMomentumScore } from "./src/modules/ins
 import { startFocus, stopFocus, getFocusState } from "./src/modules/focusEngine.js";
 
 let currentPage = "dashboard";
-
 const content = document.getElementById("content");
 
-/* ---------------- PAGES ---------------- */
+/* ---------------- SAFE PAGES ---------------- */
 
 function dashboard() {
   const score = getMomentumScore();
@@ -182,7 +173,7 @@ function dashboard() {
 function tasks() {
   const store = getStore();
 
-  return store.tasks.map(t => `
+  return (store.tasks || []).map(t => `
     <div class="card">
       <div class="title">${t.text}</div>
       <button onclick="__toggleTask(${t.id})">Toggle</button>
@@ -194,7 +185,7 @@ function tasks() {
 function notes() {
   const store = getStore();
 
-  return store.notes.map(n => `
+  return (store.notes || []).map(n => `
     <div class="card">
       <div class="title">${n.title}</div>
       <div class="subtitle">${n.content}</div>
@@ -203,7 +194,7 @@ function notes() {
 }
 
 function habits() {
-  return getHabits().map(h => `
+  return (getHabits() || []).map(h => `
     <div class="card">
       ${h.name} 🔥 ${h.streak}
     </div>
@@ -212,6 +203,7 @@ function habits() {
 
 function focus() {
   const state = getFocusState();
+
   const m = Math.floor(state.remainingSeconds / 60);
   const s = state.remainingSeconds % 60;
 
@@ -231,10 +223,15 @@ function focus() {
 
 const pages = { dashboard, tasks, notes, habits, focus };
 
-/* ---------------- RENDER ---------------- */
+/* ---------------- SAFE RENDER ---------------- */
 
 function render() {
-  content.innerHTML = (pages[currentPage] || dashboard)();
+  try {
+    content.innerHTML = (pages[currentPage] || dashboard)();
+  } catch (e) {
+    console.error(e);
+    content.innerHTML = `<div class="card">Error loading page</div>`;
+  }
 }
 
 window.loadPage = (page) => {
