@@ -16,11 +16,13 @@
   --accent: #7c5cff;
 }
 
+/* GLOBAL FIX: smooth system feel */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: system-ui;
+  transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
 }
 
 body {
@@ -30,6 +32,16 @@ body {
   overflow: hidden;
 }
 
+/* soft glow background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(124,92,255,0.08), transparent 40%);
+  pointer-events: none;
+}
+
+/* APP LAYOUT */
 .app {
   display: flex;
   height: 100vh;
@@ -82,56 +94,58 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
-/* LAYOUT FIX (IMPORTANT) */
+/* CONTENT SYSTEM */
 .content {
   padding: 28px;
   overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  transition: opacity 0.2s ease;
 }
 
+/* CARDS */
 .card {
   background: var(--panel);
   padding: 18px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  margin-bottom: 0;
-  animation: fade 0.2s ease;
 }
 
 .card:hover {
   background: var(--panel-strong);
   transform: translateY(-1px);
-  transition: 0.15s;
 }
 
-@keyframes fade {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
+/* TEXT */
 .title {
   font-size: 18px;
   font-weight: 600;
+  letter-spacing: 0.2px;
   margin-bottom: 6px;
 }
 
 .subtitle {
   font-size: 13px;
   color: var(--muted);
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
+/* BUTTONS (FINAL PREMIUM STYLE) */
 button {
   margin-top: 10px;
-  padding: 9px 12px;
-  border-radius: 10px;
-  border: none;
-  background: var(--accent);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(124,92,255,0.9);
   color: white;
   cursor: pointer;
-  transition: transform 0.08s ease, opacity 0.2s ease;
+  font-weight: 500;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  background: rgba(124,92,255,1);
 }
 
 button:active {
@@ -159,6 +173,7 @@ button:active {
   font-size: 14px;
 }
 
+/* FOCUS MODE */
 .focus-glow {
   border: 1px solid rgba(124,92,255,0.4);
   box-shadow: 0 0 20px rgba(124,92,255,0.15);
@@ -198,7 +213,7 @@ button:active {
 import { getStore } from "./src/core/store.js";
 import { addTask, deleteTask, toggleTask } from "./src/modules/tasks.js";
 import { addNote } from "./src/modules/notes.js";
-import { addHabit, getHabits } from "./src/modules/habits.js";
+import { getHabits } from "./src/modules/habits.js";
 import { getTaskStats, getHabitStats, getMomentumScore } from "./src/modules/insights.js";
 import { startFocus, stopFocus, getFocusState } from "./src/modules/focusEngine.js";
 
@@ -244,7 +259,7 @@ function loadPage(page, el) {
   if (el) el.classList.add("active");
 }
 
-/* ---------------- DASHBOARD (REDESIGNED) ---------------- */
+/* ---------------- DASHBOARD ---------------- */
 
 function dashboard() {
   const score = getMomentumScore();
@@ -280,7 +295,7 @@ function dashboard() {
   `;
 }
 
-/* ---------------- PAGES ---------------- */
+/* ---------------- TASKS ---------------- */
 
 function tasks() {
   const store = getStore();
@@ -298,6 +313,8 @@ function tasks() {
   `;
 }
 
+/* ---------------- NOTES ---------------- */
+
 function notes() {
   const store = getStore();
 
@@ -313,6 +330,8 @@ function notes() {
   `;
 }
 
+/* ---------------- HABITS ---------------- */
+
 function habits() {
   const h = getHabits();
 
@@ -327,15 +346,17 @@ function habits() {
   `;
 }
 
+/* ---------------- FOCUS ---------------- */
+
 function focus() {
   const state = getFocusState();
-  const activeClass = state.active ? "focus-glow" : "";
+  const active = state.active ? "focus-glow" : "";
 
   return `
-    <div class="card ${activeClass}">
+    <div class="card ${active}">
       <div class="title">Focus Mode</div>
       <div class="subtitle">
-        ${state.active ? "You are in deep work" : "Ready to start session"}
+        ${state.active ? "Deep work active" : "Ready to start"}
       </div>
     </div>
 
@@ -369,14 +390,6 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-const suggestions = ["dashboard","tasks","notes","habits","focus","task:","note:"];
-
-cmdInput.addEventListener("input", () => {
-  const v = cmdInput.value.toLowerCase();
-  const match = suggestions.find(s => s.startsWith(v));
-  cmdInput.placeholder = match ? `Try: ${match}` : "Type command...";
-});
-
 cmdInput.addEventListener("keydown", (e) => {
   if (e.key !== "Enter") return;
 
@@ -388,9 +401,8 @@ cmdInput.addEventListener("keydown", (e) => {
   else if (v === "habits") loadPage("habits");
   else if (v === "focus") loadPage("focus");
 
-  else if (v.startsWith("task:")) {
-    addTask(v.replace("task:", ""));
-  }
+  else if (v.startsWith("task:")) addTask(v.replace("task:", ""));
+  else if (v.startsWith("note:")) addNote("Note", v.replace("note:", ""));
 
   palette.style.display = "none";
   cmdInput.value = "";
