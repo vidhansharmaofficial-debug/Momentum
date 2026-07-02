@@ -1,29 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Momentum</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Momentum</title>
 
-  <style>
-    .title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: var(--text);
-}
-
-.subtitle {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.4;
-}
-    
-    .card:hover {
-  transform: translateY(-2px);
-  background: var(--panel-strong);
-}
- :root {
+<style>
+:root {
   --bg: #0b0c10;
   --panel: rgba(255,255,255,0.04);
   --panel-strong: rgba(255,255,255,0.07);
@@ -31,98 +14,116 @@
   --muted: rgba(255,255,255,0.55);
   --border: rgba(255,255,255,0.08);
   --accent: #7c5cff;
-
-  --radius: 14px;
-  --radius-lg: 18px;
 }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: system-ui;
-    }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui;
+}
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      height: 100vh;
-      overflow: hidden;
-    }
+body {
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+}
 
-    .app {
-      display: flex;
-      height: 100vh;
-    }
+.app {
+  display: flex;
+  height: 100vh;
+}
 
-    .sidebar {
-      width: 240px;
-      background: var(--panel);
-      padding: 16px;
-      border-right: 1px solid var(--border);
-    }
-
-    .logo {
-      font-weight: 600;
-      margin-bottom: 20px;
-    }
-
-    .nav-item {
-      padding: 10px;
-      cursor: pointer;
-      color: var(--muted);
-      border-radius: 10px;
-      margin-bottom: 6px;
-    }
-
-    .nav-item:hover {
-      background: rgba(255,255,255,0.05);
-      color: var(--text);
-    }
-
-    .nav-item.active {
-      background: rgba(124,92,255,0.2);
-      color: var(--text);
-    }
-
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .topbar {
-      height: 50px;
-      background: var(--panel);
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .content {
-      padding: 20px;
-      overflow: auto;
-    }
-
-    .card {
+/* SIDEBAR */
+.sidebar {
+  width: 240px;
   background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 18px;
-  margin-bottom: 14px;
-
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-
-  transition: transform 0.15s ease, background 0.2s ease;
+  border-right: 1px solid var(--border);
+  padding: 16px;
 }
-    @keyframes fade {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
 
-    button {
+.logo {
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.nav-item {
+  padding: 10px;
+  cursor: pointer;
+  color: var(--muted);
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+}
+
+.nav-item.active {
+  background: rgba(124,92,255,0.2);
+  color: var(--text);
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: 50px;
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* LAYOUT FIX (IMPORTANT) */
+.content {
+  padding: 28px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card {
+  background: var(--panel);
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  margin-bottom: 0;
+  animation: fade 0.2s ease;
+}
+
+.card:hover {
+  background: var(--panel-strong);
+  transform: translateY(-1px);
+  transition: 0.15s;
+}
+
+@keyframes fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+button {
   margin-top: 10px;
   padding: 9px 12px;
   border-radius: 10px;
@@ -130,12 +131,7 @@
   background: var(--accent);
   color: white;
   cursor: pointer;
-
-  transition: transform 0.08s ease, opacity 0.2s ease, filter 0.2s ease;
-}
-
-button:hover {
-  filter: brightness(1.1);
+  transition: transform 0.08s ease, opacity 0.2s ease;
 }
 
 button:active {
@@ -143,35 +139,32 @@ button:active {
   opacity: 0.85;
 }
 
-    button:active {
-      transform: scale(0.96);
-    }
+/* COMMAND PALETTE */
+#palette {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
 
-    /* COMMAND PALETTE */
-    #palette {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
+#cmdInput {
+  width: 420px;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
 
-    #cmdInput {
-      width: 420px;
-      padding: 14px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      font-size: 14px;
-    }
+.focus-glow {
+  border: 1px solid rgba(124,92,255,0.4);
+  box-shadow: 0 0 20px rgba(124,92,255,0.15);
+}
 
-    .focus-glow {
-      border: 1px solid rgba(124,92,255,0.4);
-      box-shadow: 0 0 20px rgba(124,92,255,0.15);
-    }
-  </style>
+</style>
 </head>
 
 <body>
@@ -220,16 +213,13 @@ function render() {
   content.innerHTML = pages[currentPage]();
 }
 
-/* ---------------- LIVE SYSTEM ---------------- */
+/* ---------------- LIVE TIMER ---------------- */
 
 setInterval(() => {
-  if (currentPage === "dashboard" || currentPage === "focus") {
-    render();
-  }
-
   if (currentPage === "focus") {
     const state = getFocusState();
     const el = document.getElementById("timer");
+
     if (el) {
       const m = Math.floor(state.remainingSeconds / 60);
       const s = state.remainingSeconds % 60;
@@ -254,7 +244,7 @@ function loadPage(page, el) {
   if (el) el.classList.add("active");
 }
 
-/* ---------------- PAGES ---------------- */
+/* ---------------- DASHBOARD (REDESIGNED) ---------------- */
 
 function dashboard() {
   const score = getMomentumScore();
@@ -262,22 +252,45 @@ function dashboard() {
   const habits = getHabitStats();
 
   return `
-    <div class="card"><b>Momentum Score</b><br>${score.score}/100</div>
-    <div class="card">Tasks: ${tasks.done}/${tasks.total}</div>
-    <div class="card">Habits Avg: ${habits.avgStreak}</div>
+    <div class="card">
+      <div class="title">Momentum System</div>
+      <div class="subtitle">Live productivity engine</div>
+    </div>
+
+    <div class="card">
+      <div class="title">Score</div>
+      <div class="subtitle" style="font-size:26px;font-weight:600;">
+        ${score.score}/100
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title">Execution</div>
+      <div class="subtitle">
+        Tasks: ${tasks.done}/${tasks.total} • Rate: ${tasks.rate}%
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="title">Consistency</div>
+      <div class="subtitle">
+        Habits Avg Streak: ${habits.avgStreak}
+      </div>
+    </div>
   `;
 }
+
+/* ---------------- PAGES ---------------- */
 
 function tasks() {
   const store = getStore();
 
   return `
-    <div class="card"><b>Tasks</b></div>
+    <div class="card"><div class="title">Tasks</div></div>
 
     ${store.tasks.map(t => `
       <div class="card">
         ${t.text}
-        <br>
         <button onclick="window.__toggleTask(${t.id})">Toggle</button>
         <button onclick="window.__deleteTask(${t.id})">Delete</button>
       </div>
@@ -289,11 +302,12 @@ function notes() {
   const store = getStore();
 
   return `
-    <div class="card"><b>Notes</b></div>
+    <div class="card"><div class="title">Notes</div></div>
 
     ${store.notes.map(n => `
       <div class="card">
-        <b>${n.title}</b><br>${n.content}
+        <div class="title">${n.title}</div>
+        <div class="subtitle">${n.content}</div>
       </div>
     `).join("")}
   `;
@@ -303,11 +317,11 @@ function habits() {
   const h = getHabits();
 
   return `
-    <div class="card"><b>Habits</b></div>
+    <div class="card"><div class="title">Habits</div></div>
 
     ${h.map(x => `
       <div class="card">
-        ${x.name} - 🔥 ${x.streak}
+        ${x.name} — 🔥 ${x.streak}
       </div>
     `).join("")}
   `;
@@ -315,18 +329,22 @@ function habits() {
 
 function focus() {
   const state = getFocusState();
+  const activeClass = state.active ? "focus-glow" : "";
 
   return `
-    <div class="card focus-glow">
-      <b>Focus Mode</b>
+    <div class="card ${activeClass}">
+      <div class="title">Focus Mode</div>
+      <div class="subtitle">
+        ${state.active ? "You are in deep work" : "Ready to start session"}
+      </div>
     </div>
 
     <div class="card">
-      <div id="timer">
+      <div class="title" id="timer">
         ${Math.floor(state.remainingSeconds / 60)}:00
       </div>
 
-      <button onclick="window.__startFocus()">Start</button>
+      <button onclick="window.__startFocus()">Start 25 min</button>
       <button onclick="window.__stopFocus()">Stop</button>
     </div>
   `;
@@ -349,6 +367,14 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     palette.style.display = "none";
   }
+});
+
+const suggestions = ["dashboard","tasks","notes","habits","focus","task:","note:"];
+
+cmdInput.addEventListener("input", () => {
+  const v = cmdInput.value.toLowerCase();
+  const match = suggestions.find(s => s.startsWith(v));
+  cmdInput.placeholder = match ? `Try: ${match}` : "Type command...";
 });
 
 cmdInput.addEventListener("keydown", (e) => {
