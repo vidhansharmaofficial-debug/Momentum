@@ -6,26 +6,60 @@
   <title>Momentum</title>
 
   <style>
-    :root {
-      --bg: #0f0f12;
-      --panel: rgba(22, 22, 26, 0.75);
-      --text: #ffffff;
-      --muted: rgba(255,255,255,0.6);
-      --border: rgba(255,255,255,0.06);
-      --accent: #7c5cff;
+    .focus-glow {
+      border: 1px solid rgba(124,92,255,0.4);
+      box-shadow: 0 0 30px rgba(124,92,255,0.15);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, sans-serif;
+    button {
+      transition: transform 0.08s ease, opacity 0.2s ease;
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: none;
+      background: #7c5cff;
+      color: white;
+      cursor: pointer;
+      margin-right: 6px;
+    }
+
+    button:active {
+      transform: scale(0.96);
+      opacity: 0.8;
+    }
+
+    .card {
+      animation: cardIn 0.25s ease;
+      background: rgba(22,22,26,0.75);
+      padding: 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 16px;
+      color: white;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-out {
+      opacity: 0 !important;
+      transform: translateY(6px);
+      transition: all 0.15s ease;
+    }
+
+    .fade-in {
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 0.2s ease;
     }
 
     body {
-      background: var(--bg);
-      color: var(--text);
-      height: 100vh;
+      margin: 0;
+      background: #0f0f12;
+      font-family: system-ui;
+      color: white;
       overflow: hidden;
     }
 
@@ -35,30 +69,22 @@
     }
 
     .sidebar {
-      width: 260px;
-      background: var(--panel);
-      border-right: 1px solid var(--border);
+      width: 240px;
+      background: rgba(22,22,26,0.75);
       padding: 16px;
-      backdrop-filter: blur(12px);
-    }
-
-    .logo {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 24px;
     }
 
     .nav-item {
       padding: 10px;
-      border-radius: 12px;
-      color: var(--muted);
       cursor: pointer;
-      margin-bottom: 6px;
-      transition: 0.2s;
+      color: rgba(255,255,255,0.6);
     }
 
-    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-    .nav-item.active { background: rgba(124,92,255,0.18); color: var(--text); }
+    .nav-item.active {
+      color: white;
+      background: rgba(124,92,255,0.2);
+      border-radius: 10px;
+    }
 
     .main {
       flex: 1;
@@ -67,53 +93,20 @@
     }
 
     .topbar {
-      height: 56px;
+      height: 50px;
+      background: rgba(22,22,26,0.75);
       display: flex;
       align-items: center;
-      justify-content: space-between;
       padding: 0 16px;
-      border-bottom: 1px solid var(--border);
-      background: var(--panel);
-      backdrop-filter: blur(12px);
-    }
-
-    .search {
-      flex: 1;
-      margin-right: 16px;
-      padding: 8px 12px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.05);
-      border: none;
-      color: var(--text);
-      outline: none;
     }
 
     .content {
-      padding: 24px;
+      padding: 20px;
       overflow: auto;
     }
 
-    .card {
-      background: var(--panel);
-      padding: 20px;
-      border-radius: 18px;
-      border: 1px solid var(--border);
-      margin-bottom: 16px;
-    }
-
-    .title { font-size: 20px; margin-bottom: 6px; }
-    .subtitle { color: var(--muted); }
-
-    button {
-      margin-top: 10px;
-      padding: 8px 12px;
-      border-radius: 10px;
-      border: none;
-      background: var(--accent);
-      color: white;
-      cursor: pointer;
-      margin-right: 6px;
-    }
+    .title { font-size: 18px; margin-bottom: 6px; }
+    .subtitle { color: rgba(255,255,255,0.6); }
   </style>
 </head>
 
@@ -121,8 +114,6 @@
 <div class="app">
 
   <div class="sidebar">
-    <div class="logo">⚡ Momentum</div>
-
     <div class="nav-item active" onclick="loadPage('dashboard', this)">Dashboard</div>
     <div class="nav-item" onclick="loadPage('tasks', this)">Tasks</div>
     <div class="nav-item" onclick="loadPage('notes', this)">Notes</div>
@@ -131,26 +122,18 @@
   </div>
 
   <div class="main">
-
-    <div class="topbar">
-      <input class="search" placeholder="Search Momentum..." />
-      <div>⚡ 🎵 👤</div>
-    </div>
-
+    <div class="topbar">⚡ Momentum</div>
     <div class="content" id="content"></div>
-
   </div>
+
 </div>
 
 <script type="module">
   import { getStore } from "./src/core/store.js";
-
   import { addTask, deleteTask, toggleTask } from "./src/modules/tasks.js";
   import { addNote, deleteNote } from "./src/modules/notes.js";
   import { addHabit, completeHabit, getHabits } from "./src/modules/habits.js";
-
   import { getTaskStats, getHabitStats, getMomentumScore } from "./src/modules/insights.js";
-
   import { startFocus, stopFocus, getFocusState } from "./src/modules/focusEngine.js";
 
   let currentPage = "dashboard";
@@ -158,44 +141,7 @@
   const content = document.getElementById("content");
   const items = document.querySelectorAll(".nav-item");
 
-  /* ---------------- LIVE SYSTEM ---------------- */
-
-  function renderCurrentPage() {
-    content.innerHTML = pages[currentPage]();
-  }
-
-  setInterval(() => {
-    if (currentPage === "dashboard" || currentPage === "focus") {
-      renderCurrentPage();
-    }
-
-    if (currentPage === "focus") {
-      const state = getFocusState();
-      const el = document.getElementById("focusTimer");
-
-      if (el) {
-        const m = Math.floor(state.remainingSeconds / 60);
-        const s = state.remainingSeconds % 60;
-        el.innerText = `${m}:${s.toString().padStart(2, "0")}`;
-      }
-    }
-  }, 1000);
-
-  function loadPage(page, el) {
-    currentPage = page;
-
-    content.style.opacity = "0";
-
-    setTimeout(() => {
-      renderCurrentPage();
-      content.style.opacity = "1";
-    }, 120);
-
-    items.forEach(i => i.classList.remove("active"));
-    if (el) el.classList.add("active");
-  }
-
-  /* ---------------- DASHBOARD ---------------- */
+  /* ---------------- PAGES ---------------- */
 
   function dashboard() {
     const score = getMomentumScore();
@@ -205,33 +151,20 @@
     return `
       <div class="card">
         <div class="title">Momentum Score</div>
-        <div class="subtitle">Live productivity system</div>
-      </div>
-
-      <div class="card">
-        <div class="title">${score.score}/100</div>
-        <div class="subtitle">
-          Task: ${score.taskScore} | Habit: ${score.habitScore}
-        </div>
+        <div class="subtitle">${score.score}/100</div>
       </div>
 
       <div class="card">
         <div class="title">Tasks</div>
-        <div class="subtitle">
-          Total: ${tasks.total} | Done: ${tasks.done} | Rate: ${tasks.rate}%
-        </div>
+        <div class="subtitle">${tasks.done}/${tasks.total}</div>
       </div>
 
       <div class="card">
         <div class="title">Habits</div>
-        <div class="subtitle">
-          Total: ${habits.total} | Avg Streak: ${habits.avgStreak}
-        </div>
+        <div class="subtitle">Avg Streak: ${habits.avgStreak}</div>
       </div>
     `;
   }
-
-  /* ---------------- TASKS ---------------- */
 
   function tasks() {
     const store = getStore();
@@ -246,15 +179,8 @@
           <button onclick="window.__deleteTask(${t.id})">Delete</button>
         </div>
       `).join("")}
-
-      <div class="card">
-        <input id="taskInput" placeholder="Add task..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;" />
-        <button onclick="window.__addTask()">Add</button>
-      </div>
     `;
   }
-
-  /* ---------------- NOTES ---------------- */
 
   function notes() {
     const store = getStore();
@@ -271,8 +197,6 @@
     `;
   }
 
-  /* ---------------- HABITS ---------------- */
-
   function habits() {
     const h = getHabits();
 
@@ -288,15 +212,13 @@
     `;
   }
 
-  /* ---------------- FOCUS MODE ---------------- */
-
   function focus() {
     const state = getFocusState();
 
     return `
-      <div class="card">
+      <div class="card focus-glow">
         <div class="title">Focus Mode</div>
-        <div class="subtitle">Deep work system</div>
+        <div class="subtitle">Deep Work Session</div>
       </div>
 
       <div class="card">
@@ -305,34 +227,58 @@
           ${Math.floor(state.remainingSeconds / 60)}:00
         </div>
 
-        <button onclick="window.__startFocus()">Start</button>
+        <button onclick="window.__startFocus()">Start 25 min</button>
         <button onclick="window.__stopFocus()">Stop</button>
       </div>
     `;
   }
 
+  /* FIXED PAGES OBJECT */
   const pages = { dashboard, tasks, notes, habits, focus };
+
+  /* ---------------- NAV ---------------- */
+
+  function renderCurrentPage() {
+    content.innerHTML = pages[currentPage]();
+  }
+
+  function loadPage(page, el) {
+    currentPage = page;
+
+    content.classList.add("fade-out");
+
+    setTimeout(() => {
+      renderCurrentPage();
+      content.classList.remove("fade-out");
+      content.classList.add("fade-in");
+    }, 120);
+
+    items.forEach(i => i.classList.remove("active"));
+    if (el) el.classList.add("active");
+  }
+
+  /* ---------------- LIVE TIMER ---------------- */
+
+  setInterval(() => {
+    if (currentPage === "focus") {
+      const state = getFocusState();
+      const el = document.getElementById("focusTimer");
+
+      if (el) {
+        const m = Math.floor(state.remainingSeconds / 60);
+        const s = state.remainingSeconds % 60;
+        el.innerText = `${m}:${s.toString().padStart(2, "0")}`;
+      }
+    }
+  }, 1000);
 
   /* ---------------- GLOBAL ACTIONS ---------------- */
 
-  window.__addTask = () => {
-    const i = document.getElementById("taskInput");
-    if (i.value) addTask(i.value);
-    loadPage("tasks");
-  };
-
-  window.__deleteTask = (id) => {
-    deleteTask(id);
-    loadPage("tasks");
-  };
-
-  window.__toggleTask = (id) => {
-    toggleTask(id);
-    loadPage("tasks");
-  };
-
   window.__startFocus = () => startFocus(25);
   window.__stopFocus = () => stopFocus();
+
+  window.__toggleTask = (id) => toggleTask(id);
+  window.__deleteTask = (id) => deleteTask(id);
 
   /* ---------------- INIT ---------------- */
 
