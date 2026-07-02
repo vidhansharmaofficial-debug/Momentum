@@ -135,6 +135,10 @@
     .subtitle {
       color: var(--muted);
     }
+
+    button {
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -171,153 +175,140 @@
   </div>
 
   <script>
-  const content = document.getElementById("content");
-  const items = document.querySelectorAll(".nav-item");
+    const content = document.getElementById("content");
+    const items = document.querySelectorAll(".nav-item");
 
-  // ---------- STORAGE ----------
-  function getData(key, fallback) {
-    return JSON.parse(localStorage.getItem(key)) || fallback;
-  }
-
-  function setData(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
-
-  // ---------- INITIAL DATA ----------
-  let tasks = getData("tasks", []);
-
-  // ---------- RENDER HELPERS ----------
-  function renderTasks() {
-    if (tasks.length === 0) {
-      return `<div class="card">
-        <div class="title">Tasks</div>
-        <div class="subtitle">No tasks yet. Add one below.</div>
-      </div>`;
+    function getData(key, fallback) {
+      return JSON.parse(localStorage.getItem(key)) || fallback;
     }
 
-    return `
-      <div class="card">
-        <div class="title">Tasks</div>
-        <div class="subtitle">Your active tasks</div>
-      </div>
+    function setData(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
 
-      ${tasks.map((t, i) => `
-        <div class="card">
-          <div class="title">${t.text}</div>
-          <div class="subtitle">
-            <button onclick="toggleTask(${i})">Toggle Complete</button>
-            <button onclick="deleteTask(${i})">Delete</button>
+    let tasks = getData("tasks", []);
+
+    function renderTasks() {
+      if (tasks.length === 0) {
+        return `
+          <div class="card">
+            <div class="title">Tasks</div>
+            <div class="subtitle">No tasks yet. Add one below.</div>
           </div>
+
+          <div class="card">
+            <input id="taskInput" placeholder="Add a task..." style="
+              width:100%;
+              padding:10px;
+              border-radius:10px;
+              border:none;
+              outline:none;
+              background:rgba(255,255,255,0.05);
+              color:white;
+            "/>
+
+            <button onclick="addTask()" style="
+              margin-top:10px;
+              padding:8px 12px;
+              border-radius:10px;
+              border:none;
+              background:#7c5cff;
+              color:white;
+            ">Add</button>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="card">
+          <div class="title">Tasks</div>
+          <div class="subtitle">Your tasks</div>
         </div>
-      `).join("")}
 
-      <div class="card">
-        <input id="taskInput" placeholder="Add new task..." style="
-          width:100%;
-          padding:10px;
-          border-radius:10px;
-          border:none;
-          outline:none;
-          background:rgba(255,255,255,0.05);
-          color:white;
-        "/>
-        <button onclick="addTask()" style="
-          margin-top:10px;
-          padding:8px 12px;
-          border-radius:10px;
-          border:none;
-          background:#7c5cff;
-          color:white;
-          cursor:pointer;
-        ">Add Task</button>
-      </div>
-    `;
-  }
+        ${tasks.map((t, i) => `
+          <div class="card">
+            <div class="title">${t.text}</div>
+            <div class="subtitle">
+              <button onclick="toggleTask(${i})">Toggle</button>
+              <button onclick="deleteTask(${i})">Delete</button>
+            </div>
+          </div>
+        `).join("")}
 
-  // ---------- TASK FUNCTIONS ----------
-  function addTask() {
-    const input = document.getElementById("taskInput");
-    if (!input.value.trim()) return;
+        <div class="card">
+          <input id="taskInput" placeholder="Add a task..." style="
+            width:100%;
+            padding:10px;
+            border-radius:10px;
+            border:none;
+            outline:none;
+            background:rgba(255,255,255,0.05);
+            color:white;
+          "/>
 
-    tasks.push({ text: input.value, done: false });
-    setData("tasks", tasks);
+          <button onclick="addTask()" style="
+            margin-top:10px;
+            padding:8px 12px;
+            border-radius:10px;
+            border:none;
+            background:#7c5cff;
+            color:white;
+          ">Add</button>
+        </div>
+      `;
+    }
 
-    loadPage("tasks");
-  }
+    function addTask() {
+      const input = document.getElementById("taskInput");
+      if (!input.value.trim()) return;
 
-  function deleteTask(index) {
-    tasks.splice(index, 1);
-    setData("tasks", tasks);
-    loadPage("tasks");
-  }
+      tasks.push({ text: input.value });
+      setData("tasks", tasks);
+      loadPage("tasks");
+    }
 
-  function toggleTask(index) {
-    tasks[index].done = !tasks[index].done;
-    setData("tasks", tasks);
-    loadPage("tasks");
-  }
+    function deleteTask(i) {
+      tasks.splice(i, 1);
+      setData("tasks", tasks);
+      loadPage("tasks");
+    }
 
-  // ---------- PAGES ----------
-  const pages = {
-    dashboard: `
-      <div class="card">
-        <div class="title">Dashboard</div>
-        <div class="subtitle">Your productivity overview</div>
-      </div>
-    `,
-    tasks: renderTasks(),
-    calendar: `
-      <div class="card">
-        <div class="title">Calendar</div>
-        <div class="subtitle">Coming soon</div>
-      </div>
-    `,
-    notes: `
-      <div class="card">
-        <div class="title">Notes</div>
-        <div class="subtitle">Coming soon</div>
-      </div>
-    `,
-    scratchpad: `
-      <div class="card">
-        <div class="title">Scratchpad</div>
-        <div class="subtitle">Coming soon</div>
-      </div>
-    `,
-    spaces: `
-      <div class="card">
-        <div class="title">Spaces</div>
-        <div class="subtitle">Coming soon</div>
-      </div>
-    `,
-    insights: `
-      <div class="card">
-        <div class="title">Insights</div>
-        <div class="subtitle">Coming soon</div>
-      </div>
-    `,
-    settings: `
-      <div class="card">
-        <div class="title">Settings</div>
-        <div class="subtitle">Coming soon</div>
-      </div>
-    `
-  };
+    function toggleTask(i) {
+      tasks[i].done = !tasks[i].done;
+      setData("tasks", tasks);
+      loadPage("tasks");
+    }
 
-  // ---------- NAV ----------
-  function loadPage(page, el) {
-    content.style.opacity = "0";
+    const pages = {
+      dashboard: `
+        <div class="card">
+          <div class="title">Dashboard</div>
+          <div class="subtitle">Your productivity overview</div>
+        </div>
+      `,
+      tasks: renderTasks(),
+      calendar: `<div class="card"><div class="title">Calendar</div></div>`,
+      notes: `<div class="card"><div class="title">Notes</div></div>`,
+      scratchpad: `<div class="card"><div class="title">Scratchpad</div></div>`,
+      spaces: `<div class="card"><div class="title">Spaces</div></div>`,
+      insights: `<div class="card"><div class="title">Insights</div></div>`,
+      settings: `<div class="card"><div class="title">Settings</div></div>`
+    };
 
-    setTimeout(() => {
-      content.innerHTML = pages[page];
-      content.style.opacity = "1";
-    }, 120);
+    function loadPage(page, el) {
+      content.style.opacity = "0";
 
-    items.forEach(i => i.classList.remove("active"));
-    if (el) el.classList.add("active");
-  }
+      setTimeout(() => {
+        content.innerHTML = pages[page] || "";
+        content.style.opacity = "1";
+      }, 120);
 
-  loadPage("dashboard");
-</script>
+      items.forEach(i => i.classList.remove("active"));
+      if (el) el.classList.add("active");
+    }
+
+    loadPage("dashboard");
+  </script>
+
 </body>
 </html>
