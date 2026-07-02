@@ -56,7 +56,6 @@
       cursor: pointer;
       margin-bottom: 6px;
       transition: all 0.2s ease;
-      user-select: none;
     }
 
     .nav-item:hover {
@@ -118,13 +117,6 @@
       border-radius: 18px;
       border: 1px solid var(--border);
       margin-bottom: 16px;
-      transition: all 0.2s ease;
-      backdrop-filter: blur(10px);
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(124,92,255,0.25);
     }
 
     .title {
@@ -137,6 +129,12 @@
     }
 
     button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: none;
+      background: var(--accent);
+      color: white;
       cursor: pointer;
     }
   </style>
@@ -151,8 +149,8 @@
 
       <div class="nav-item active" onclick="loadPage('dashboard', this)">Dashboard</div>
       <div class="nav-item" onclick="loadPage('tasks', this)">Tasks</div>
-      <div class="nav-item" onclick="loadPage('calendar', this)">Calendar</div>
       <div class="nav-item" onclick="loadPage('notes', this)">Notes</div>
+      <div class="nav-item" onclick="loadPage('calendar', this)">Calendar</div>
       <div class="nav-item" onclick="loadPage('scratchpad', this)">Scratchpad</div>
       <div class="nav-item" onclick="loadPage('spaces', this)">Spaces</div>
       <div class="nav-item" onclick="loadPage('insights', this)">Insights</div>
@@ -162,119 +160,133 @@
     <!-- MAIN -->
     <div class="main">
 
-      <!-- TOPBAR -->
       <div class="topbar">
         <input class="search" placeholder="Search Momentum..." />
         <div class="icons">🔔 🎵 👤</div>
       </div>
 
-      <!-- CONTENT -->
       <div class="content" id="content"></div>
 
     </div>
   </div>
 
   <script type="module">
-  import { getStore } from "./src/core/store.js";
-  import { addTask, deleteTask, toggleTask } from "./src/modules/tasks.js";
+    import { getStore } from "./src/core/store.js";
+    import { addTask, deleteTask, toggleTask } from "./src/modules/tasks.js";
+    import { addNote, deleteNote } from "./src/modules/notes.js";
 
-  const content = document.getElementById("content");
-  const items = document.querySelectorAll(".nav-item");
+    const content = document.getElementById("content");
+    const items = document.querySelectorAll(".nav-item");
 
-  function renderTasks() {
-    const store = getStore();
-    const tasks = store.tasks;
+    function loadPage(page, el) {
+      content.style.opacity = "0";
 
-    return `
-      <div class="card">
-        <div class="title">Tasks</div>
-        <div class="subtitle">Your productivity system</div>
-      </div>
+      setTimeout(() => {
+        content.innerHTML = pages[page] || "";
+        content.style.opacity = "1";
+      }, 120);
 
-      ${tasks.length === 0 ? `
+      items.forEach(i => i.classList.remove("active"));
+      if (el) el.classList.add("active");
+    }
+
+    // ---------- TASK UI ----------
+    function renderTasks() {
+      const store = getStore();
+
+      return `
         <div class="card">
-          <div class="title">No tasks yet</div>
-          <div class="subtitle">Add your first task below</div>
+          <div class="title">Tasks</div>
+          <div class="subtitle">Your productivity system</div>
         </div>
-      ` : tasks.map(t => `
-        <div class="card">
-          <div class="title" style="${t.done ? 'text-decoration:line-through;opacity:0.5;' : ''}">
-            ${t.text}
-          </div>
 
-          <div class="subtitle">
+        ${store.tasks.map(t => `
+          <div class="card">
+            <div class="title" style="${t.done ? 'text-decoration:line-through;opacity:0.5;' : ''}">
+              ${t.text}
+            </div>
             <button onclick="window.__toggleTask(${t.id})">Toggle</button>
             <button onclick="window.__deleteTask(${t.id})">Delete</button>
           </div>
+        `).join("")}
+
+        <div class="card">
+          <input id="taskInput" placeholder="Add task..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;"/>
+          <button onclick="window.__addTask()">Add Task</button>
         </div>
-      `).join("")}
+      `;
+    }
 
-      <div class="card">
-        <input id="taskInput" placeholder="Add a task..." style="
-          width:100%;
-          padding:10px;
-          border-radius:10px;
-          border:none;
-          outline:none;
-          background:rgba(255,255,255,0.05);
-          color:white;
-        "/>
+    // ---------- NOTES UI ----------
+    function renderNotes() {
+      const store = getStore();
 
-        <button onclick="window.__addTask()" style="
-          margin-top:10px;
-          padding:8px 12px;
-          border-radius:10px;
-          border:none;
-          background:#7c5cff;
-          color:white;
-        ">Add Task</button>
-      </div>
-    `;
-  }
+      return `
+        <div class="card">
+          <div class="title">Notes</div>
+          <div class="subtitle">Your thinking space</div>
+        </div>
 
-  const pages = {
-    dashboard: `<div class="card"><div class="title">Dashboard</div></div>`,
-    tasks: renderTasks(),
-    calendar: `<div class="card"><div class="title">Calendar</div></div>`,
-    notes: `<div class="card"><div class="title">Notes</div></div>`,
-    scratchpad: `<div class="card"><div class="title">Scratchpad</div></div>`,
-    spaces: `<div class="card"><div class="title">Spaces</div></div>`,
-    insights: `<div class="card"><div class="title">Insights</div></div>`,
-    settings: `<div class="card"><div class="title">Settings</div></div>`
-  };
+        <div class="card">
+          <input id="noteTitle" placeholder="Title..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;margin-bottom:10px;"/>
+          <textarea id="noteContent" placeholder="Write note..." style="width:100%;height:120px;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;"></textarea>
+          <button onclick="window.__addNote()">Save Note</button>
+        </div>
 
-  function loadPage(page, el) {
-    content.style.opacity = "0";
+        ${store.notes.map(n => `
+          <div class="card">
+            <div class="title">${n.title}</div>
+            <div class="subtitle">${n.content}</div>
+            <button onclick="window.__deleteNote(${n.id})">Delete</button>
+          </div>
+        `).join("")}
+      `;
+    }
 
-    setTimeout(() => {
-      content.innerHTML = pages[page] || "";
-      content.style.opacity = "1";
-    }, 120);
+    const pages = {
+      dashboard: `<div class="card"><div class="title">Dashboard</div></div>`,
+      tasks: renderTasks(),
+      notes: renderNotes(),
+      calendar: `<div class="card"><div class="title">Calendar</div></div>`,
+      scratchpad: `<div class="card"><div class="title">Scratchpad</div></div>`,
+      spaces: `<div class="card"><div class="title">Spaces</div></div>`,
+      insights: `<div class="card"><div class="title">Insights</div></div>`,
+      settings: `<div class="card"><div class="title">Settings</div></div>`
+    };
 
-    items.forEach(i => i.classList.remove("active"));
-    if (el) el.classList.add("active");
-  }
+    // ---------- GLOBAL FUNCTIONS ----------
+    window.__addTask = () => {
+      const input = document.getElementById("taskInput");
+      if (!input.value.trim()) return;
+      addTask(input.value);
+      loadPage("tasks");
+    };
 
-  // expose module functions to UI buttons
-  window.__addTask = () => {
-    const input = document.getElementById("taskInput");
-    if (!input.value.trim()) return;
+    window.__deleteTask = (id) => {
+      deleteTask(id);
+      loadPage("tasks");
+    };
 
-    addTask(input.value);
-    loadPage("tasks");
-  };
+    window.__toggleTask = (id) => {
+      toggleTask(id);
+      loadPage("tasks");
+    };
 
-  window.__deleteTask = (id) => {
-    deleteTask(id);
-    loadPage("tasks");
-  };
+    window.__addNote = () => {
+      const title = document.getElementById("noteTitle").value;
+      const content = document.getElementById("noteContent").value;
+      if (!title.trim() || !content.trim()) return;
+      addNote(title, content);
+      loadPage("notes");
+    };
 
-  window.__toggleTask = (id) => {
-    toggleTask(id);
-    loadPage("tasks");
-  };
+    window.__deleteNote = (id) => {
+      deleteNote(id);
+      loadPage("notes");
+    };
 
-  loadPage("dashboard");
-</script>
+    loadPage("dashboard");
+  </script>
+
 </body>
 </html>
