@@ -57,3 +57,19 @@ export function getMomentumScore() {
     habitScore
   };
 }
+export function getFocusStats() {
+  const sessions = getFocusSessions();
+
+  const total = sessions.length;
+  const completed = sessions.filter(s => s.completed).length;
+
+  const minutes = sessions
+    .filter(s => s.completed)
+    .reduce((sum, s) => sum + (s.duration || 0), 0);
+
+  return {
+    total,
+    completed,
+    minutes
+  };
+}
