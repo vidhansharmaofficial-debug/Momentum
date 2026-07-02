@@ -135,14 +135,15 @@
   </div>
 
   <div class="main">
+
     <div class="topbar">
       <input class="search" placeholder="Search Momentum..." />
       <div>🔔 🎵 👤</div>
     </div>
 
     <div class="content" id="content"></div>
-  </div>
 
+  </div>
 </div>
 
 <script type="module">
@@ -158,14 +159,34 @@
     getMomentumScore
   } from "./src/modules/insights.js";
 
+  let currentPage = "dashboard";
+
   const content = document.getElementById("content");
   const items = document.querySelectorAll(".nav-item");
 
+  /* ---------------- LIVE SYSTEM ---------------- */
+
+  function renderCurrentPage() {
+    content.innerHTML = pages[currentPage] || "";
+  }
+
+  function startLiveSystem() {
+    setInterval(() => {
+      if (currentPage === "dashboard") {
+        renderCurrentPage();
+      }
+    }, 2000);
+  }
+
+  /* ---------------- NAVIGATION ---------------- */
+
   function loadPage(page, el) {
+    currentPage = page;
+
     content.style.opacity = "0";
 
     setTimeout(() => {
-      content.innerHTML = pages[page] || "";
+      renderCurrentPage();
       content.style.opacity = "1";
     }, 120);
 
@@ -174,6 +195,7 @@
   }
 
   /* ---------------- TASKS ---------------- */
+
   function renderTasks() {
     const store = getStore();
 
@@ -198,6 +220,7 @@
   }
 
   /* ---------------- NOTES ---------------- */
+
   function renderNotes() {
     const store = getStore();
 
@@ -221,6 +244,7 @@
   }
 
   /* ---------------- HABITS ---------------- */
+
   function renderHabits() {
     const habits = getHabits();
 
@@ -242,7 +266,8 @@
     `;
   }
 
-  /* ---------------- DASHBOARD (INTELLIGENCE LAYER) ---------------- */
+  /* ---------------- DASHBOARD (INTELLIGENCE) ---------------- */
+
   function renderDashboard() {
     const score = getMomentumScore();
     const tasks = getTaskStats();
@@ -251,12 +276,14 @@
     return `
       <div class="card">
         <div class="title">Momentum Score</div>
-        <div class="subtitle">Your productivity identity metric</div>
+        <div class="subtitle">Live productivity intelligence system</div>
       </div>
 
       <div class="card">
         <div class="title">${score.score}/100</div>
-        <div class="subtitle">Task: ${score.taskScore} | Habit: ${score.habitScore}</div>
+        <div class="subtitle">
+          Task: ${score.taskScore} | Habit: ${score.habitScore}
+        </div>
       </div>
 
       <div class="card">
@@ -276,18 +303,18 @@
   }
 
   const pages = {
-    dashboard: renderDashboard(),
-    tasks: renderTasks(),
-    notes: renderNotes(),
-    habits: renderHabits(),
-    calendar: `<div class="card"><div class="title">Calendar</div></div>`,
-    scratchpad: `<div class="card"><div class="title">Scratchpad</div></div>`,
-    spaces: `<div class="card"><div class="title">Spaces</div></div>`,
-    insights: `<div class="card"><div class="title">Insights</div></div>`,
-    settings: `<div class="card"><div class="title">Settings</div></div>`
+    dashboard: renderDashboard,
+    tasks: renderTasks,
+    notes: renderNotes,
+    habits: renderHabits,
+    calendar: () => `<div class="card"><div class="title">Calendar</div></div>`,
+    scratchpad: () => `<div class="card"><div class="title">Scratchpad</div></div>`,
+    spaces: () => `<div class="card"><div class="title">Spaces</div></div>`,
+    insights: () => `<div class="card"><div class="title">Insights</div></div>`,
+    settings: () => `<div class="card"><div class="title">Settings</div></div>`
   };
 
-  /* ---------------- GLOBAL FUNCTIONS ---------------- */
+  /* ---------------- GLOBAL ACTIONS ---------------- */
 
   window.__addTask = () => {
     const i = document.getElementById("taskInput");
@@ -331,7 +358,14 @@
     loadPage("habits");
   };
 
-  loadPage("dashboard");
+  /* ---------------- INIT ---------------- */
+
+  function init() {
+    renderCurrentPage();
+    startLiveSystem();
+  }
+
+  init();
 
 </script>
 
