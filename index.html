@@ -34,7 +34,6 @@
       height: 100vh;
     }
 
-    /* SIDEBAR */
     .sidebar {
       width: 260px;
       background: var(--panel);
@@ -55,27 +54,18 @@
       color: var(--muted);
       cursor: pointer;
       margin-bottom: 6px;
-      transition: all 0.2s ease;
+      transition: 0.2s;
     }
 
-    .nav-item:hover {
-      background: rgba(255,255,255,0.05);
-      color: var(--text);
-    }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .nav-item.active { background: rgba(124,92,255,0.18); color: var(--text); }
 
-    .nav-item.active {
-      background: rgba(124,92,255,0.18);
-      color: var(--text);
-    }
-
-    /* MAIN */
     .main {
       flex: 1;
       display: flex;
       flex-direction: column;
     }
 
-    /* TOPBAR */
     .topbar {
       height: 56px;
       display: flex;
@@ -98,13 +88,6 @@
       outline: none;
     }
 
-    .icons {
-      display: flex;
-      gap: 12px;
-      color: var(--muted);
-    }
-
-    /* CONTENT */
     .content {
       padding: 24px;
       overflow: auto;
@@ -119,14 +102,8 @@
       margin-bottom: 16px;
     }
 
-    .title {
-      font-size: 22px;
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      color: var(--muted);
-    }
+    .title { font-size: 20px; margin-bottom: 6px; }
+    .subtitle { color: var(--muted); }
 
     button {
       margin-top: 10px;
@@ -141,193 +118,222 @@
 </head>
 
 <body>
-  <div class="app">
+<div class="app">
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="logo">⚡ Momentum</div>
+  <div class="sidebar">
+    <div class="logo">⚡ Momentum</div>
 
-      <div class="nav-item active" onclick="loadPage('dashboard', this)">Dashboard</div>
-      <div class="nav-item" onclick="loadPage('tasks', this)">Tasks</div>
-      <div class="nav-item" onclick="loadPage('notes', this)">Notes</div>
-      <div class="nav-item" onclick="loadPage('habits', this)">Habits</div>
-      <div class="nav-item" onclick="loadPage('calendar', this)">Calendar</div>
-      <div class="nav-item" onclick="loadPage('scratchpad', this)">Scratchpad</div>
-      <div class="nav-item" onclick="loadPage('spaces', this)">Spaces</div>
-      <div class="nav-item" onclick="loadPage('insights', this)">Insights</div>
-      <div class="nav-item" onclick="loadPage('settings', this)">Settings</div>
-    </div>
-
-    <!-- MAIN -->
-    <div class="main">
-
-      <div class="topbar">
-        <input class="search" placeholder="Search Momentum..." />
-        <div class="icons">🔔 🎵 👤</div>
-      </div>
-
-      <div class="content" id="content"></div>
-
-    </div>
+    <div class="nav-item active" onclick="loadPage('dashboard', this)">Dashboard</div>
+    <div class="nav-item" onclick="loadPage('tasks', this)">Tasks</div>
+    <div class="nav-item" onclick="loadPage('notes', this)">Notes</div>
+    <div class="nav-item" onclick="loadPage('habits', this)">Habits</div>
+    <div class="nav-item" onclick="loadPage('calendar', this)">Calendar</div>
+    <div class="nav-item" onclick="loadPage('scratchpad', this)">Scratchpad</div>
+    <div class="nav-item" onclick="loadPage('spaces', this)">Spaces</div>
+    <div class="nav-item" onclick="loadPage('insights', this)">Insights</div>
+    <div class="nav-item" onclick="loadPage('settings', this)">Settings</div>
   </div>
 
-  <script type="module">
-    import { getStore } from "./src/core/store.js";
-    import { addTask, deleteTask, toggleTask } from "./src/modules/tasks.js";
-    import { addNote, deleteNote } from "./src/modules/notes.js";
-    import { addHabit, completeHabit, getHabits } from "./src/modules/habits.js";
+  <div class="main">
+    <div class="topbar">
+      <input class="search" placeholder="Search Momentum..." />
+      <div>🔔 🎵 👤</div>
+    </div>
 
-    const content = document.getElementById("content");
-    const items = document.querySelectorAll(".nav-item");
+    <div class="content" id="content"></div>
+  </div>
 
-    function loadPage(page, el) {
-      content.style.opacity = "0";
+</div>
 
-      setTimeout(() => {
-        content.innerHTML = pages[page] || "";
-        content.style.opacity = "1";
-      }, 120);
+<script type="module">
+  import { getStore } from "./src/core/store.js";
 
-      items.forEach(i => i.classList.remove("active"));
-      if (el) el.classList.add("active");
-    }
+  import { addTask, deleteTask, toggleTask } from "./src/modules/tasks.js";
+  import { addNote, deleteNote } from "./src/modules/notes.js";
+  import { addHabit, completeHabit, getHabits } from "./src/modules/habits.js";
 
-    /* ---------------- TASKS ---------------- */
-    function renderTasks() {
-      const store = getStore();
+  import {
+    getTaskStats,
+    getHabitStats,
+    getMomentumScore
+  } from "./src/modules/insights.js";
 
-      return `
+  const content = document.getElementById("content");
+  const items = document.querySelectorAll(".nav-item");
+
+  function loadPage(page, el) {
+    content.style.opacity = "0";
+
+    setTimeout(() => {
+      content.innerHTML = pages[page] || "";
+      content.style.opacity = "1";
+    }, 120);
+
+    items.forEach(i => i.classList.remove("active"));
+    if (el) el.classList.add("active");
+  }
+
+  /* ---------------- TASKS ---------------- */
+  function renderTasks() {
+    const store = getStore();
+
+    return `
+      <div class="card"><div class="title">Tasks</div></div>
+
+      ${store.tasks.map(t => `
         <div class="card">
-          <div class="title">Tasks</div>
-          <div class="subtitle">Your productivity system</div>
-        </div>
-
-        ${store.tasks.map(t => `
-          <div class="card">
-            <div class="title" style="${t.done ? 'text-decoration:line-through;opacity:0.5;' : ''}">
-              ${t.text}
-            </div>
-            <button onclick="window.__toggleTask(${t.id})">Toggle</button>
-            <button onclick="window.__deleteTask(${t.id})">Delete</button>
+          <div class="title" style="${t.done ? 'text-decoration:line-through;opacity:0.5;' : ''}">
+            ${t.text}
           </div>
-        `).join("")}
-
-        <div class="card">
-          <input id="taskInput" placeholder="Add task..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;"/>
-          <button onclick="window.__addTask()">Add Task</button>
+          <button onclick="window.__toggleTask(${t.id})">Toggle</button>
+          <button onclick="window.__deleteTask(${t.id})">Delete</button>
         </div>
-      `;
-    }
+      `).join("")}
 
-    /* ---------------- NOTES ---------------- */
-    function renderNotes() {
-      const store = getStore();
+      <div class="card">
+        <input id="taskInput" placeholder="Add task..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;" />
+        <button onclick="window.__addTask()">Add Task</button>
+      </div>
+    `;
+  }
 
-      return `
+  /* ---------------- NOTES ---------------- */
+  function renderNotes() {
+    const store = getStore();
+
+    return `
+      <div class="card"><div class="title">Notes</div></div>
+
+      <div class="card">
+        <input id="noteTitle" placeholder="Title..." style="width:100%;padding:10px;margin-bottom:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;" />
+        <textarea id="noteContent" placeholder="Write note..." style="width:100%;height:120px;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;"></textarea>
+        <button onclick="window.__addNote()">Save Note</button>
+      </div>
+
+      ${store.notes.map(n => `
         <div class="card">
-          <div class="title">Notes</div>
-          <div class="subtitle">Your thinking space</div>
+          <div class="title">${n.title}</div>
+          <div class="subtitle">${n.content}</div>
+          <button onclick="window.__deleteNote(${n.id})">Delete</button>
         </div>
+      `).join("")}
+    `;
+  }
 
+  /* ---------------- HABITS ---------------- */
+  function renderHabits() {
+    const habits = getHabits();
+
+    return `
+      <div class="card"><div class="title">Habits</div></div>
+
+      ${habits.map(h => `
         <div class="card">
-          <input id="noteTitle" placeholder="Title..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;margin-bottom:10px;"/>
-          <textarea id="noteContent" placeholder="Write note..." style="width:100%;height:120px;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;"></textarea>
-          <button onclick="window.__addNote()">Save Note</button>
+          <div class="title">${h.name}</div>
+          <div class="subtitle">🔥 Streak: ${h.streak}</div>
+          <button onclick="window.__completeHabit(${h.id})">Complete</button>
         </div>
+      `).join("")}
 
-        ${store.notes.map(n => `
-          <div class="card">
-            <div class="title">${n.title}</div>
-            <div class="subtitle">${n.content}</div>
-            <button onclick="window.__deleteNote(${n.id})">Delete</button>
-          </div>
-        `).join("")}
-      `;
-    }
+      <div class="card">
+        <input id="habitInput" placeholder="New habit..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;" />
+        <button onclick="window.__addHabit()">Add Habit</button>
+      </div>
+    `;
+  }
 
-    /* ---------------- HABITS ---------------- */
-    function renderHabits() {
-      const habits = getHabits();
+  /* ---------------- DASHBOARD (INTELLIGENCE LAYER) ---------------- */
+  function renderDashboard() {
+    const score = getMomentumScore();
+    const tasks = getTaskStats();
+    const habits = getHabitStats();
 
-      return `
-        <div class="card">
-          <div class="title">Habits</div>
-          <div class="subtitle">Build consistency</div>
+    return `
+      <div class="card">
+        <div class="title">Momentum Score</div>
+        <div class="subtitle">Your productivity identity metric</div>
+      </div>
+
+      <div class="card">
+        <div class="title">${score.score}/100</div>
+        <div class="subtitle">Task: ${score.taskScore} | Habit: ${score.habitScore}</div>
+      </div>
+
+      <div class="card">
+        <div class="title">Tasks</div>
+        <div class="subtitle">
+          Total: ${tasks.total} | Done: ${tasks.done} | Rate: ${tasks.rate}%
         </div>
+      </div>
 
-        ${habits.map(h => `
-          <div class="card">
-            <div class="title">${h.name}</div>
-            <div class="subtitle">🔥 Streak: ${h.streak}</div>
-            <button onclick="window.__completeHabit(${h.id})">Complete Today</button>
-          </div>
-        `).join("")}
-
-        <div class="card">
-          <input id="habitInput" placeholder="New habit..." style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.05);color:white;"/>
-          <button onclick="window.__addHabit()">Add Habit</button>
+      <div class="card">
+        <div class="title">Habits</div>
+        <div class="subtitle">
+          Total: ${habits.total} | Avg Streak: ${habits.avgStreak}
         </div>
-      `;
-    }
+      </div>
+    `;
+  }
 
-    /* ---------------- PAGES ---------------- */
-    const pages = {
-      dashboard: `<div class="card"><div class="title">Dashboard</div></div>`,
-      tasks: renderTasks(),
-      notes: renderNotes(),
-      habits: renderHabits(),
-      calendar: `<div class="card"><div class="title">Calendar</div></div>`,
-      scratchpad: `<div class="card"><div class="title">Scratchpad</div></div>`,
-      spaces: `<div class="card"><div class="title">Spaces</div></div>`,
-      insights: `<div class="card"><div class="title">Insights</div></div>`,
-      settings: `<div class="card"><div class="title">Settings</div></div>`
-    };
+  const pages = {
+    dashboard: renderDashboard(),
+    tasks: renderTasks(),
+    notes: renderNotes(),
+    habits: renderHabits(),
+    calendar: `<div class="card"><div class="title">Calendar</div></div>`,
+    scratchpad: `<div class="card"><div class="title">Scratchpad</div></div>`,
+    spaces: `<div class="card"><div class="title">Spaces</div></div>`,
+    insights: `<div class="card"><div class="title">Insights</div></div>`,
+    settings: `<div class="card"><div class="title">Settings</div></div>`
+  };
 
-    /* ---------------- GLOBAL FUNCTIONS ---------------- */
-    window.__addTask = () => {
-      const input = document.getElementById("taskInput");
-      if (!input.value.trim()) return;
-      addTask(input.value);
-      loadPage("tasks");
-    };
+  /* ---------------- GLOBAL FUNCTIONS ---------------- */
 
-    window.__deleteTask = (id) => {
-      deleteTask(id);
-      loadPage("tasks");
-    };
+  window.__addTask = () => {
+    const i = document.getElementById("taskInput");
+    if (!i.value.trim()) return;
+    addTask(i.value);
+    loadPage("tasks");
+  };
 
-    window.__toggleTask = (id) => {
-      toggleTask(id);
-      loadPage("tasks");
-    };
+  window.__deleteTask = (id) => {
+    deleteTask(id);
+    loadPage("tasks");
+  };
 
-    window.__addNote = () => {
-      const title = document.getElementById("noteTitle").value;
-      const content = document.getElementById("noteContent").value;
-      if (!title.trim() || !content.trim()) return;
-      addNote(title, content);
-      loadPage("notes");
-    };
+  window.__toggleTask = (id) => {
+    toggleTask(id);
+    loadPage("tasks");
+  };
 
-    window.__deleteNote = (id) => {
-      deleteNote(id);
-      loadPage("notes");
-    };
+  window.__addNote = () => {
+    const t = document.getElementById("noteTitle").value;
+    const c = document.getElementById("noteContent").value;
+    if (!t.trim() || !c.trim()) return;
+    addNote(t, c);
+    loadPage("notes");
+  };
 
-    window.__addHabit = () => {
-      const input = document.getElementById("habitInput");
-      if (!input.value.trim()) return;
-      addHabit(input.value);
-      loadPage("habits");
-    };
+  window.__deleteNote = (id) => {
+    deleteNote(id);
+    loadPage("notes");
+  };
 
-    window.__completeHabit = (id) => {
-      completeHabit(id);
-      loadPage("habits");
-    };
+  window.__addHabit = () => {
+    const i = document.getElementById("habitInput");
+    if (!i.value.trim()) return;
+    addHabit(i.value);
+    loadPage("habits");
+  };
 
-    loadPage("dashboard");
-  </script>
+  window.__completeHabit = (id) => {
+    completeHabit(id);
+    loadPage("habits");
+  };
+
+  loadPage("dashboard");
+
+</script>
 
 </body>
 </html>
