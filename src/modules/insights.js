@@ -1,5 +1,5 @@
 import { getStore } from "../core/store.js";
-import { getFocusSessions, getFocusState } from "./focus.js";
+import { getFocusSessions, getFocusState } from "./focusEngine.js";
 
 /**
  * Task stats
@@ -7,8 +7,8 @@ import { getFocusSessions, getFocusState } from "./focus.js";
 export function getTaskStats() {
   const store = getStore();
 
-  const total = store.tasks.length;
-  const done = store.tasks.filter(t => t.done).length;
+  const total = store.tasks?.length || 0;
+  const done = store.tasks?.filter(t => t.done).length || 0;
 
   return {
     total,
@@ -23,7 +23,7 @@ export function getTaskStats() {
 export function getHabitStats() {
   const store = getStore();
 
-  const total = store.habits.length;
+  const total = store.habits?.length || 0;
 
   const avgStreak =
     total === 0
@@ -95,8 +95,9 @@ export function getMomentumScore() {
     .filter(s => s.completed)
     .reduce((sum, s) => sum + (s.duration || 0), 0);
 
-  const focusScore = Math.min(focusMinutes, 120);
-  const normalizedFocusScore = Math.round((focusScore / 120) * 100);
+  const normalizedFocusScore = Math.round(
+    Math.min(focusMinutes, 120) / 120 * 100
+  );
 
   const liveBoost = live.active ? 10 : 0;
 
