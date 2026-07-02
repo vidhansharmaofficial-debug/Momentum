@@ -4,7 +4,7 @@ const STORE_KEY = "momentum_data";
  * Get full app state
  */
 export function getStore() {
-  return JSON.parse(localStorage.getItem(STORE_KEY)) || {
+  return JSON.parse(localStorage.getItem("momentum_data")) || {
     tasks: [],
     notes: [],
     habits: [],
@@ -13,8 +13,7 @@ export function getStore() {
       theme: "dark"
     },
     meta: {
-      createdAt: Date.now(),
-      lastOpened: Date.now()
+      createdAt: Date.now()
     }
   };
 }
