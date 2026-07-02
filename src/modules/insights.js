@@ -1,5 +1,6 @@
 import { getStore } from "../core/store.js";
 import { getFocusSessions } from "./focus.js";
+import { getFocusState, getFocusSessions } from "./focus.js";
 /**
  * Calculate task completion rate
  */
@@ -45,24 +46,39 @@ export function getHabitStats() {
 export function getMomentumScore() {
   const taskStats = getTaskStats();
   const habitStats = getHabitStats();
-  const focusStats = getFocusStats();
+  const focusSessions = getFocusSessions();
 
-  // Task performance (0–100)
   const taskScore = taskStats.rate;
 
-  // Habit consistency (0–100)
   const habitScore = Math.min(habitStats.avgStreak * 10, 100);
 
-  // Focus productivity (based on time spent)
-  const focusScore = Math.min(focusStats.minutes, 120); // cap at 120 min
+  const focusMinutes = focusSessions
+    .filter(s => s.completed)
+    .reduce((sum, s) => sum + (s.duration || 0), 0);
+
+  const focusScore = Math.min(focusMinutes, 120);
   const normalizedFocusScore = Math.round((focusScore / 120) * 100);
 
-  // Weighted system
+  // LIVE penalty/boost system
+  const live = getLiveFocusState();
+  const liveBoost = live.active ? 10 : 0;
+
   const score = Math.round(
-    taskScore * 0.4 +
-    habitScore * 0.3 +
-    normalizedFocusScore * 0.3
+    taskScore * 0.35 +
+    habitScore * 0.25 +
+    normalizedFocusScore * 0.30 +
+    liveBoost * 0.10
   );
+
+  return {
+    score,
+    taskScore,
+    habitScore,
+    focusScore: normalizedFocusScore,
+    focusMinutes,
+    liveFocus: live
+  };
+}
 
   return {
     score,
@@ -86,5 +102,20 @@ export function getFocusStats() {
     total,
     completed,
     minutes
+  };
+}
+export function getLiveFocusState() {
+  const sessions = getFocusSessions();
+  const state = getFocusState();
+
+  const todaySessions = sessions.filter(s => {
+    const d = new Date(s.startedAt).toDateString();
+    return d === new Date().toDateString();
+  });
+
+  return {
+    active: state.active,
+    remainingSeconds: state.remainingSeconds,
+    todayCount: todaySessions.length
   };
 }
