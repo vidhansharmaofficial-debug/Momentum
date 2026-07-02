@@ -4,14 +4,20 @@ import { getStore, saveStore } from "../core/store.js";
  * Get all habits
  */
 export function getHabits() {
-  return getStore().habits;
+  return getStore().habits || [];
 }
 
 /**
- * Add a new habit
+ * Add new habit
  */
 export function addHabit(name) {
   const store = getStore();
+
+  store.habits = store.habits || [];
+
+  // prevent duplicates (basic safety)
+  const exists = store.habits.find(h => h.name === name);
+  if (exists) return;
 
   store.habits.push({
     id: Date.now(),
@@ -24,7 +30,7 @@ export function addHabit(name) {
 }
 
 /**
- * Mark habit as completed today
+ * Mark habit complete
  */
 export function completeHabit(id) {
   const store = getStore();
@@ -33,12 +39,13 @@ export function completeHabit(id) {
   if (!habit) return;
 
   const today = new Date().toDateString();
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
 
-  // already completed today → do nothing
+  // already done today
   if (habit.lastCompleted === today) return;
 
   // streak logic
-  if (habit.lastCompleted === new Date(Date.now() - 86400000).toDateString()) {
+  if (habit.lastCompleted === yesterday) {
     habit.streak += 1;
   } else {
     habit.streak = 1;
@@ -50,20 +57,23 @@ export function completeHabit(id) {
 }
 
 /**
- * Reset habits view state (not data loss)
+ * Get habits summary stats
  */
-export function resetHabitView() {
-  const store = getStore();
+export function getHabitStats() {
+  const habits = getHabits();
 
-  const today = new Date().toDateString();
+  if (habits.length === 0) {
+    return {
+      total: 0,
+      avgStreak: 0
+    };
+  }
 
-  store.habits.forEach(h => {
-    if (h.lastCompleted && h.lastCompleted !== today) {
-      h.canCompleteToday = true;
-    } else {
-      h.canCompleteToday = false;
-    }
-  });
+  const avgStreak =
+    habits.reduce((sum, h) => sum + (h.streak || 0), 0) / habits.length;
 
-  saveStore(store);
+  return {
+    total: habits.length,
+    avgStreak: Math.round(avgStreak)
+  };
 }
