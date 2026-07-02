@@ -21,7 +21,6 @@
   padding: 0;
   box-sizing: border-box;
   font-family: system-ui;
-  transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
 }
 
 body {
@@ -31,19 +30,12 @@ body {
   overflow: hidden;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at top, rgba(124,92,255,0.08), transparent 40%);
-  pointer-events: none;
-}
-
 .app {
   display: flex;
   height: 100vh;
 }
 
+/* SIDEBAR */
 .sidebar {
   width: 240px;
   background: var(--panel);
@@ -73,6 +65,7 @@ body::before {
   background: rgba(124,92,255,0.2);
 }
 
+/* MAIN */
 .main {
   flex: 1;
   display: flex;
@@ -89,62 +82,40 @@ body::before {
 }
 
 .content {
-  padding: 28px;
+  padding: 24px;
   overflow: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  opacity: 1;
 }
 
 .card {
   background: var(--panel);
-  padding: 18px;
-  border-radius: 14px;
+  padding: 16px;
+  border-radius: 12px;
   border: 1px solid var(--border);
-}
-
-.card:hover {
-  background: var(--panel-strong);
+  margin-bottom: 12px;
 }
 
 .title {
-  font-size: 18px;
   font-weight: 600;
+  margin-bottom: 6px;
 }
 
 .subtitle {
-  font-size: 13px;
   color: var(--muted);
+  font-size: 13px;
 }
 
 button {
   margin-top: 10px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(124,92,255,0.9);
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
   color: white;
   cursor: pointer;
 }
 
 button:hover {
-  transform: translateY(-1px);
-}
-
-/* palette */
-#palette {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
-#cmdInput {
-  width: 420px;
-  padding: 14px;
+  opacity: 0.9;
 }
 </style>
 </head>
@@ -155,11 +126,12 @@ button:hover {
 
   <div class="sidebar">
     <div class="logo">⚡ Momentum</div>
-    <div class="nav-item active" onclick="loadPage('dashboard', this)">Dashboard</div>
-    <div class="nav-item" onclick="loadPage('tasks', this)">Tasks</div>
-    <div class="nav-item" onclick="loadPage('notes', this)">Notes</div>
-    <div class="nav-item" onclick="loadPage('habits', this)">Habits</div>
-    <div class="nav-item" onclick="loadPage('focus', this)">Focus</div>
+
+    <div class="nav-item active" onclick="loadPage('dashboard')">Dashboard</div>
+    <div class="nav-item" onclick="loadPage('tasks')">Tasks</div>
+    <div class="nav-item" onclick="loadPage('notes')">Notes</div>
+    <div class="nav-item" onclick="loadPage('habits')">Habits</div>
+    <div class="nav-item" onclick="loadPage('focus')">Focus</div>
   </div>
 
   <div class="main">
@@ -167,10 +139,6 @@ button:hover {
     <div class="content" id="content"></div>
   </div>
 
-</div>
-
-<div id="palette">
-  <input id="cmdInput" placeholder="command..." />
 </div>
 
 <script type="module">
@@ -182,49 +150,47 @@ import { getHabits } from "./src/modules/habits.js";
 import { getTaskStats, getHabitStats, getMomentumScore } from "./src/modules/insights.js";
 import { startFocus, stopFocus, getFocusState } from "./src/modules/focusEngine.js";
 
-let current = "dashboard";
+let currentPage = "dashboard";
 
 const content = document.getElementById("content");
-const items = document.querySelectorAll(".nav-item");
 
-function render() {
-  content.innerHTML = pages[current]();
-}
+/* ---------------- PAGES ---------------- */
 
-function loadPage(p, el) {
-  current = p;
-  render();
-  items.forEach(i => i.classList.remove("active"));
-  if (el) el.classList.add("active");
-}
-
-/* DASHBOARD */
 function dashboard() {
   const score = getMomentumScore();
   const tasks = getTaskStats();
   const habits = getHabitStats();
 
   return `
-    <div class="card"><div class="title">Score ${score.score}/100</div></div>
-    <div class="card"><div class="subtitle">Tasks ${tasks.done}/${tasks.total}</div></div>
-    <div class="card"><div class="subtitle">Habits avg ${habits.avgStreak}</div></div>
+    <div class="card">
+      <div class="title">Momentum Score</div>
+      <div class="subtitle">${score.score}/100</div>
+    </div>
+
+    <div class="card">
+      <div class="title">Tasks</div>
+      <div class="subtitle">${tasks.done}/${tasks.total}</div>
+    </div>
+
+    <div class="card">
+      <div class="title">Habits</div>
+      <div class="subtitle">Avg streak: ${habits.avgStreak}</div>
+    </div>
   `;
 }
 
-/* TASKS */
 function tasks() {
   const store = getStore();
 
   return store.tasks.map(t => `
     <div class="card">
-      ${t.text}
-      <button onclick="window.__toggleTask(${t.id})">toggle</button>
-      <button onclick="window.__deleteTask(${t.id})">delete</button>
+      <div class="title">${t.text}</div>
+      <button onclick="__toggleTask(${t.id})">Toggle</button>
+      <button onclick="__deleteTask(${t.id})">Delete</button>
     </div>
   `).join("");
 }
 
-/* NOTES */
 function notes() {
   const store = getStore();
 
@@ -236,66 +202,70 @@ function notes() {
   `).join("");
 }
 
-/* HABITS */
 function habits() {
   return getHabits().map(h => `
-    <div class="card">${h.name} 🔥${h.streak}</div>
+    <div class="card">
+      ${h.name} 🔥 ${h.streak}
+    </div>
   `).join("");
 }
 
-/* FOCUS */
 function focus() {
   const state = getFocusState();
   const m = Math.floor(state.remainingSeconds / 60);
   const s = state.remainingSeconds % 60;
 
   return `
-    <div class="card"><div class="title">Focus ${state.active ? "ON" : "OFF"}</div></div>
+    <div class="card">
+      <div class="title">Focus Mode</div>
+      <div class="subtitle">${state.active ? "Running" : "Stopped"}</div>
+    </div>
+
     <div class="card">
       <div class="title">${m}:${s.toString().padStart(2,'0')}</div>
-      <button onclick="window.__startFocus()">start</button>
-      <button onclick="window.__stopFocus()">stop</button>
+      <button onclick="__startFocus()">Start</button>
+      <button onclick="__stopFocus()">Stop</button>
     </div>
   `;
 }
 
 const pages = { dashboard, tasks, notes, habits, focus };
 
-/* palette */
-const palette = document.getElementById("palette");
-const input = document.getElementById("cmdInput");
+/* ---------------- RENDER ---------------- */
 
-window.addEventListener("keydown", e => {
-  if (e.ctrlKey && e.key === "k") {
-    palette.style.display = "flex";
-    input.focus();
-  }
-  if (e.key === "Escape") palette.style.display = "none";
-});
+function render() {
+  content.innerHTML = (pages[currentPage] || dashboard)();
+}
 
-input.addEventListener("keydown", e => {
-  if (e.key !== "Enter") return;
+window.loadPage = (page) => {
+  currentPage = page;
+  render();
+};
 
-  const v = input.value.trim().toLowerCase();
+/* ---------------- GLOBAL ACTIONS ---------------- */
 
-  if (v === "tasks") loadPage("tasks");
-  if (v === "notes") loadPage("notes");
-  if (v === "focus") loadPage("focus");
+window.__toggleTask = (id) => {
+  toggleTask(id);
+  render();
+};
 
-  if (v.startsWith("task:")) addTask(v.replace("task:", ""));
-  if (v.startsWith("note:")) addNote("note", v.replace("note:", ""));
+window.__deleteTask = (id) => {
+  deleteTask(id);
+  render();
+};
 
-  palette.style.display = "none";
-  input.value = "";
-});
+window.__startFocus = () => {
+  startFocus(25);
+  render();
+};
 
-/* actions */
-window.__toggleTask = toggleTask;
-window.__deleteTask = deleteTask;
-window.__startFocus = () => startFocus(25);
-window.__stopFocus = stopFocus;
+window.__stopFocus = () => {
+  stopFocus();
+  render();
+};
 
-/* init */
+/* ---------------- INIT ---------------- */
+
 render();
 
 </script>
