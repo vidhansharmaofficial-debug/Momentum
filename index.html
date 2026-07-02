@@ -6,14 +6,35 @@
   <title>Momentum</title>
 
   <style>
-    :root {
-      --bg: #0f0f12;
-      --panel: rgba(22,22,26,0.75);
-      --text: #fff;
-      --muted: rgba(255,255,255,0.6);
-      --border: rgba(255,255,255,0.06);
-      --accent: #7c5cff;
-    }
+    .title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+    
+    .card:hover {
+  transform: translateY(-2px);
+  background: var(--panel-strong);
+}
+ :root {
+  --bg: #0b0c10;
+  --panel: rgba(255,255,255,0.04);
+  --panel-strong: rgba(255,255,255,0.07);
+  --text: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.55);
+  --border: rgba(255,255,255,0.08);
+  --accent: #7c5cff;
+
+  --radius: 14px;
+  --radius-lg: 18px;
+}
 
     * {
       margin: 0;
@@ -85,28 +106,42 @@
     }
 
     .card {
-      background: var(--panel);
-      padding: 18px;
-      border-radius: 14px;
-      margin-bottom: 12px;
-      border: 1px solid var(--border);
-      animation: fade 0.2s ease;
-    }
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 14px;
 
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  transition: transform 0.15s ease, background 0.2s ease;
+}
     @keyframes fade {
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     button {
-      margin-top: 8px;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 8px;
-      background: var(--accent);
-      color: white;
-      cursor: pointer;
-    }
+  margin-top: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+
+  transition: transform 0.08s ease, opacity 0.2s ease, filter 0.2s ease;
+}
+
+button:hover {
+  filter: brightness(1.1);
+}
+
+button:active {
+  transform: scale(0.96);
+  opacity: 0.85;
+}
 
     button:active {
       transform: scale(0.96);
