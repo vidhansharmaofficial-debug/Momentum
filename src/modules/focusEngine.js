@@ -1,17 +1,20 @@
-import { startFocusSession, completeFocusSession } from "./focus.js";
+import {
+  startFocusSession,
+  completeFocusSession,
+  getFocusSessions
+} from "./focus.js";
 
-/**
- * Active timer state
- */
 let activeSession = null;
 let timer = null;
 let remainingSeconds = 0;
 
 /**
- * Start a focus session (real timer)
+ * Start focus session (engine)
  */
 export function startFocus(duration = 25) {
-  // create session in storage
+  // prevent double sessions
+  if (activeSession) return activeSession;
+
   const session = startFocusSession(duration);
 
   activeSession = session;
@@ -23,7 +26,7 @@ export function startFocus(duration = 25) {
 }
 
 /**
- * Internal timer engine
+ * Timer engine
  */
 function runTimer(sessionId) {
   clearInterval(timer);
@@ -32,7 +35,6 @@ function runTimer(sessionId) {
     remainingSeconds--;
 
     if (remainingSeconds <= 0) {
-      clearInterval(timer);
       finish(sessionId);
     }
   }, 1000);
@@ -42,14 +44,16 @@ function runTimer(sessionId) {
  * Finish session
  */
 function finish(sessionId) {
-  activeSession = null;
-  remainingSeconds = 0;
+  clearInterval(timer);
 
   completeFocusSession(sessionId);
+
+  activeSession = null;
+  remainingSeconds = 0;
 }
 
 /**
- * Stop session manually
+ * Stop manually
  */
 export function stopFocus() {
   clearInterval(timer);
