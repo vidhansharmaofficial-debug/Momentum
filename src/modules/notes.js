@@ -4,7 +4,7 @@ import { getStore, saveStore } from "../core/store.js";
  * Get all notes
  */
 export function getNotes() {
-  return getStore().notes;
+  return getStore().notes || [];
 }
 
 /**
@@ -12,6 +12,8 @@ export function getNotes() {
  */
 export function addNote(title, content) {
   const store = getStore();
+
+  store.notes = store.notes || [];
 
   const note = {
     id: Date.now(),
@@ -31,6 +33,10 @@ export function addNote(title, content) {
  */
 export function deleteNote(id) {
   const store = getStore();
+
+  store.notes = store.notes || [];
+
   store.notes = store.notes.filter(n => n.id !== id);
+
   saveStore(store);
 }
